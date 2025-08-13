@@ -2,10 +2,13 @@ const express = require('express');
 const { createServer } = require("http");
 const { Server } = require('socket.io');
 const cors = require('cors');
+const passport = require('passport');
 
 
 const app = express();
-// app.use(cors());
+app.use(cors());
+
+require('./passport/jwtStrategyConfig.js');
 
 
 const httpServer = createServer(app);
@@ -15,7 +18,7 @@ const io = new Server(httpServer, {
   }
 });
 
-app.get('/', (req, res) => {
+app.get('/', passport.authenticate('jwt', {session: false}),  (req, res) => {
   res.json({
     hello: 'world'
   })
