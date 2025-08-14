@@ -4,14 +4,17 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const passport = require('passport');
 
+const loginRouter = require('./routes/loginRouter.js');
 const registerRouter = require('./routes/registerRouter.js');
 
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/register', registerRouter);
+app.use('/login', loginRouter);
 
 require('./passport/jwtStrategyConfig.js');
 
@@ -28,6 +31,15 @@ const io = new Server(httpServer, {
 app.get('/', passport.authenticate('jwt', {session: false}),  (req, res) => {
   res.json({
     hello: 'world'
+  })
+});
+
+app.get('/protected-route', passport.authenticate('jwt', {session: false}), (req, res) => {
+  const token = req.headers.authorization.split(' ')[1];
+  const user = jwt.verify(token, process.env.JWT_SECRET);  
+  res.json({
+    user,
+    protected: 'route'
   })
 });
 
