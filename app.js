@@ -4,11 +4,18 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const passport = require('passport');
 
+const registerRouter = require('./routes/registerRouter.js');
+
 
 const app = express();
 app.use(cors());
+app.use(express.urlencoded({ extended: true }))
+
+app.use('/register', registerRouter);
 
 require('./passport/jwtStrategyConfig.js');
+
+
 
 
 const httpServer = createServer(app);
@@ -23,6 +30,8 @@ app.get('/', passport.authenticate('jwt', {session: false}),  (req, res) => {
     hello: 'world'
   })
 });
+
+
 
 io.on('connection', (socket) => {
   console.log('client has connected')
