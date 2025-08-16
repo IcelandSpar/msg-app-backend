@@ -15,13 +15,14 @@ datasource db {
 }
 
 model Profile {
-  id          String   @id @default(uuid())
-  profileName String   @db.VarChar(18)
-  bio         String?  @db.VarChar(190)
-  joined      DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  profileName        String   @db.VarChar(18)
+  bio                String?  @db.VarChar(190)
+  joined             DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  profileImgFilePath String?  @db.VarChar(260)
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
 }
 

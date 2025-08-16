@@ -11,7 +11,8 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 app.use('/register', registerRouter);
 app.use('/login', loginRouter);
@@ -25,7 +26,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: ['http://localhost:5173']
-  }
+  },
 });
 
 app.get('/', passport.authenticate('jwt', {session: false}),  (req, res) => {
