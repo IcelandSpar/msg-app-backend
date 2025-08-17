@@ -14,6 +14,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       String @id @default(uuid())
+  username String @db.VarChar(255)
+  password String @db.VarChar(255)
+
+  Profile Profile?
+
+  FriendRequest FriendRequest[]
+}
+
 model Profile {
   id                 String   @id @default(uuid())
   profileName        String   @db.VarChar(18)
@@ -22,14 +32,82 @@ model Profile {
   updatedAt          DateTime @updatedAt
   profileImgFilePath String?  @db.VarChar(260)
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
+  friendRequestSender   FriendRequest[] @relation("Sender")
+  friendRequestReceiver FriendRequest[] @relation("Receiver")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String    @unique
+  friendOne Friend[]  @relation("friendOne")
+  friendTwo Friend[]  @relation("friendTwo")
+  Message   Message[]
+  Member    Member[]
 }
 
-model User {
-  id       String @id @default(uuid())
-  username String @db.VarChar(255)
-  password String @db.VarChar(255)
+model FriendRequest {
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now())
+  status    FriendStatus
 
-  Profile Profile?
+  Sender     Profile @relation("Sender", fields: [SenderId], references: [id])
+  SenderId   String
+  Receiver   Profile @relation("Receiver", fields: [ReceiverId], references: [id])
+  ReceiverId String
+  User       User?   @relation(fields: [userId], references: [id])
+  userId     String?
+
+  @@unique([SenderId, ReceiverId])
+}
+
+model Friend {
+  id          String @id @default(uuid())
+  friendOneId String
+  friendTwoId String
+
+  friendOne Profile @relation("friendOne", fields: [friendOneId], references: [id])
+  friendTwo Profile @relation("friendTwo", fields: [friendTwoId], references: [id])
+
+  @@unique([friendOneId, friendTwoId])
+}
+
+model Group {
+  id        String   @id @default(uuid())
+  groupName String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Member Member[]
+}
+
+model Member {
+  id        String     @id @default(uuid())
+  role      MemberRole
+  joined    DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  profileId String
+  groupId   String
+
+  member Profile @relation(fields: [profileId], references: [id])
+  group  Group   @relation(fields: [groupId], references: [id])
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  messageContent String   @db.VarChar(2000)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  authorId      String
+  messageAuthor Profile @relation(fields: [authorId], references: [id])
+}
+
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum MemberRole {
+  USER
+  ADMIN
 }
