@@ -41,6 +41,7 @@ model Profile {
   friendTwo Friend[]  @relation("friendTwo")
   Message   Message[]
   Member    Member[]
+  Group     Group[]
 }
 
 model FriendRequest {
@@ -70,12 +71,15 @@ model Friend {
 }
 
 model Group {
-  id        String   @id @default(uuid())
-  groupName String   @db.VarChar(255)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  groupName    String   @db.VarChar(255)
+  groupImgPath String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  creatorId    String
 
-  Member Member[]
+  creator Profile  @relation(fields: [creatorId], references: [id])
+  Member  Member[]
 }
 
 model Member {

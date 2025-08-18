@@ -2,20 +2,7 @@ const prisma = require("../db/prismaClient.js");
 const bcrypt = require("bcryptjs");
 const fs = require('node:fs/promises');
 
-
-const checkIfUserExists = async (submittedUsername) => {
-  const user = await prisma.user.findFirst({
-    where: {
-      username: submittedUsername,
-    },
-  });
-  return !!user;
-};
-
-
-const deleteFileSubmitted = (fileSubmitted) => fileSubmitted ? fs.unlink(fileSubmitted.path) : null;
-
-
+const { checkIfUserExists, deleteFileSubmitted } = require('../utils/userQuery.js');
 
 
 const createAccount = async (req, res, next) => {
@@ -35,9 +22,6 @@ const createAccount = async (req, res, next) => {
           password: hash,
         },
       });
-
-
-      
 
       await prisma.profile.create({
         data: {

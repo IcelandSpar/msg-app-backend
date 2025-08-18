@@ -6,6 +6,7 @@ const passport = require('passport');
 
 const loginRouter = require('./routes/loginRouter.js');
 const registerRouter = require('./routes/registerRouter.js');
+const groupActionsRouter = require('./routes/groupActionsRouter.js');
 
 const jwt = require('jsonwebtoken');
 
@@ -16,6 +17,7 @@ app.use(express.static('public'));
 
 app.use('/register', registerRouter);
 app.use('/login', loginRouter);
+app.use('/group-actions', groupActionsRouter);
 
 require('./passport/jwtStrategyConfig.js');
 

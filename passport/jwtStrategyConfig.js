@@ -14,7 +14,7 @@ passport.use(
       const user = await prisma.user.findFirst({
         where: {
           username: username,
-        },
+        }
       });
       const match = await bcrypt.compare(password, user.password);
       if(!match) { cb(null, false, { message: 'Incorrect username or password.' }) };
@@ -33,6 +33,9 @@ passport.use(
         where: {
           id: jwt_payload.sub,
         },
+        omit: {
+          password: true,
+        }
       });
       if (user) {
         return done(null, user);

@@ -8,6 +8,7 @@ loginRouter.post("/", (req, res, next) => {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (!err || user) {
       req.login(user, { session: false }, (err) => {
+        delete user["password"];
         const token = jwt.sign(user, process.env.JWT_SECRET, {
           expiresIn: "10h",
         });
