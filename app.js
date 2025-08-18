@@ -3,6 +3,7 @@ const { createServer } = require("http");
 const { Server } = require('socket.io');
 const cors = require('cors');
 const passport = require('passport');
+const path = require('node:path')
 
 const loginRouter = require('./routes/loginRouter.js');
 const registerRouter = require('./routes/registerRouter.js');
@@ -13,7 +14,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use("/public", express.static("public"));
 
 app.use('/register', registerRouter);
 app.use('/login', loginRouter);

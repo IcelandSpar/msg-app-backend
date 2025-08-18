@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { createGroup } = require('../controllers/groupActionsController');
+const { getMemberGroups, createGroup } = require('../controllers/groupActionsController');
 const groupActionsRouter = Router();
 
 const multer = require("multer");
@@ -36,6 +36,8 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
+
+groupActionsRouter.get('/get-member-groups', passport.authenticate('jwt', { session: false }), getMemberGroups);
 
 groupActionsRouter.post('/create', passport.authenticate('jwt', { session: false }), upload.single('groupImg'), createGroup);
 
