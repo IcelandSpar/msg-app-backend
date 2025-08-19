@@ -1,9 +1,13 @@
-const { Router } = require('express');
-const { getMemberGroups, createGroup } = require('../controllers/groupActionsController');
+const { Router } = require("express");
+const {
+  getMemberGroups,
+  createGroup,
+  getGroupChatMessages,
+} = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
 
 const multer = require("multer");
-const passport = require('passport');
+const passport = require("passport");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/group-images");
@@ -16,7 +20,6 @@ const storage = multer.diskStorage({
 // const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-
   if (
     file.mimetype == "image/jpeg" ||
     file.mimetype == "image/png" ||
@@ -24,7 +27,6 @@ const fileFilter = (req, file, cb) => {
   ) {
     return cb(null, true);
   } else {
-
     return cb(null, false);
   }
 };
@@ -37,8 +39,23 @@ const upload = multer({
 });
 
 
-groupActionsRouter.get('/get-member-groups', passport.authenticate('jwt', { session: false }), getMemberGroups);
+groupActionsRouter.get(
+  "/get-group-chat-msgs/:groupId",
+  passport.authenticate("jwt", { session: false }),
+  getGroupChatMessages
+);
 
-groupActionsRouter.post('/create', passport.authenticate('jwt', { session: false }), upload.single('groupImg'), createGroup);
+groupActionsRouter.get(
+  "/get-member-groups",
+  passport.authenticate("jwt", { session: false }),
+  getMemberGroups
+);
+
+groupActionsRouter.post(
+  "/create",
+  passport.authenticate("jwt", { session: false }),
+  upload.single("groupImg"),
+  createGroup
+);
 
 module.exports = groupActionsRouter;

@@ -37,8 +37,8 @@ const getMemberGroups = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(401).json({
-      message: 'Something went wrong...'
-    })
+      message: "Something went wrong...",
+    });
   }
 };
 
@@ -82,7 +82,25 @@ const createGroup = async (req, res) => {
   }
 };
 
+const joinRoom = () => {};
+
+const getGroupChatMessages = async (req, res) => {
+
+  try {
+    const groupChatMsgs = await prisma.message.findMany({
+      where: {
+        groupId: req.params.groupId,
+      },
+    });
+
+    return res.status(200).json(groupChatMsgs);
+  } catch (err) {
+    return res.status(401).json({ message: 'Something went wrong...' })
+  }
+};
+
 module.exports = {
   getMemberGroups,
   createGroup,
+  getGroupChatMessages,
 };
