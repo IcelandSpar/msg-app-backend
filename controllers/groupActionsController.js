@@ -86,6 +86,12 @@ const joinRoom = () => {};
 
 const getGroupChatMessages = async (req, res) => {
 
+  // const socket = req.app.get("socket");
+
+
+
+
+
   try {
     const groupChatMsgs = await prisma.message.findMany({
       where: {

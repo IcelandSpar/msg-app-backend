@@ -32,6 +32,34 @@ const io = new Server(httpServer, {
   },
 });
 
+io.on("connection", (socket) => {
+  socket.emit('connected', 'Welcome to the chat!');
+
+
+  socket.on('joinRoom', (clientInfo) => {
+    socket.join(clientInfo.groupId)
+    socket.emit('joinRoomMsg', clientInfo.profileName + ' just joined the room!')
+  });
+
+  socket.on('send message', ({ groupId, message }) => {
+    console.log('detected')
+    socket.broadcast.to(groupId).emit('received message', {
+      date: new Date(),
+      profileName: 'john doe',
+      message: message,
+      groupId,
+    });
+  })
+
+
+
+  // app.set("socket", socket)
+
+
+})
+
+
+
 app.get('/', passport.authenticate('jwt', {session: false}),  (req, res) => {
   res.json({
     hello: 'world'
@@ -49,24 +77,19 @@ app.get('/protected-route', passport.authenticate('jwt', {session: false}), (req
 
 
 
-io.on('connection', (socket) => {
-  console.log('client has connected')
-  socket.emit('connection', 'welcome to the chat!')
+// io.on('connection', (socket) => {
+//   console.log('a user connected')
 
-
-  socket.on('button press', () => {
-    io.emit('button press', socket.id + ' pressed the button');
-  })
-
-  socket.on('disconnecting', (reason) => {
-    io.emit('user left', socket.id + ' left for some reason');
-  })
-
-})
+//   socket.on('chat message', (msg) => {
+//     console.log('message: ' + 'hi')
+//     io.emit('chat message', 'message: ' + msg)
+//   })
+// })
 
 
 
 httpServer.listen(3000, () => {
   console.log(`listening on port ${3000}`)
 });
+
 
