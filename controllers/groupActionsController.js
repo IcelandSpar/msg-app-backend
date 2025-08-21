@@ -12,27 +12,14 @@ const getMemberGroups = async (req, res) => {
       },
     });
 
-    const memberGroups = await prisma.profile.findFirst({
+    const memberGroups = await prisma.member.findMany({
       where: {
-        userId: userObj.id,
+        profileId: userProfile.id
       },
       include: {
-        Group: true,
-        Member: {
-          where: {
-            profileId: userProfile.id,
-          },
-        },
-      },
-      omit: {
-        bio: true,
-        joined: true,
-        profileName: true,
-        profileImgFilePath: true,
-        updatedAt: true,
-      },
+        group: true
+      }
     });
-
     return res.status(200).json(memberGroups);
   } catch (err) {
     console.error(err);
@@ -41,6 +28,8 @@ const getMemberGroups = async (req, res) => {
     });
   }
 };
+
+
 
 const createGroup = async (req, res) => {
   try {
