@@ -7,6 +7,7 @@ const path = require('node:path')
 
 const loginRouter = require('./routes/loginRouter.js');
 const registerRouter = require('./routes/registerRouter.js');
+const profileRouter = require('./routes/profileRouter.js');
 const groupActionsRouter = require('./routes/groupActionsRouter.js');
 
 const jwt = require('jsonwebtoken');
@@ -18,6 +19,7 @@ app.use("/public", express.static("public"));
 
 app.use('/register', registerRouter);
 app.use('/login', loginRouter);
+app.use('/profile', profileRouter);
 app.use('/group-actions', groupActionsRouter);
 
 require('./passport/jwtStrategyConfig.js');
@@ -41,11 +43,11 @@ io.on("connection", (socket) => {
     socket.emit('joinRoomMsg', clientInfo.profileName + ' just joined the room!')
   });
 
-  socket.on('send message', ({ groupId, message }) => {
+  socket.on('send message', ({ groupId, message, profileName }) => {
     console.log('detected')
-    socket.broadcast.to(groupId).emit('received message', {
+    socket.to(groupId).emit('received message', {
       date: new Date(),
-      profileName: 'john doe',
+      profileName: profileName,
       message: message,
       groupId,
     });
