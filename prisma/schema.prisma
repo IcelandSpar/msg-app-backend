@@ -73,7 +73,7 @@ model Friend {
 model Group {
   id           String   @id @default(uuid())
   groupName    String   @db.VarChar(255)
-  groupImgPath String?
+  groupImgPath String?  @db.VarChar(260)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   creatorId    String
@@ -103,9 +103,19 @@ model Message {
   updatedAt      DateTime @updatedAt
 
   groupId       String
-  group         Group   @relation(fields: [groupId], references: [id])
+  group         Group        @relation(fields: [groupId], references: [id])
   authorId      String
-  messageAuthor Profile @relation(fields: [authorId], references: [id])
+  messageAuthor Profile      @relation(fields: [authorId], references: [id])
+  MessageImg    MessageImg[]
+}
+
+model MessageImg {
+  id      String  @id @default(uuid())
+  imgPath String  @db.VarChar(260)
+  spoiler Boolean @default(false)
+
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id])
 }
 
 enum FriendStatus {
