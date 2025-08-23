@@ -54,12 +54,19 @@ io.on("connection", (socket) => {
       imgPath: imgPath,
     });
 
+
+
     socket.on('disconnect', () => {
       console.log('someone left')
     })
   })
 
-
+  socket.on('user typing', ({profileName, groupId}) => {
+    socket.to(groupId).emit('user typing', {
+      profileName: profileName,
+      typerGroupId: groupId,
+    });
+  });
 
   // app.set("socket", socket)
 
