@@ -10,8 +10,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -28,6 +29,7 @@ model Profile {
   id                 String   @id @default(uuid())
   profileName        String   @db.VarChar(18)
   bio                String?  @db.VarChar(190)
+  friendCode         String?  @db.VarChar(255)
   joined             DateTime @default(now())
   updatedAt          DateTime @updatedAt
   profileImgFilePath String?  @db.VarChar(260)
