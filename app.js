@@ -7,6 +7,7 @@ const path = require('node:path')
 
 const loginRouter = require('./routes/loginRouter.js');
 const registerRouter = require('./routes/registerRouter.js');
+const friendRouter = require('./routes/friendRouter.js');
 const profileRouter = require('./routes/profileRouter.js');
 const groupActionsRouter = require('./routes/groupActionsRouter.js');
 const chatRouter = require('./routes/chatRouter.js');
@@ -21,6 +22,7 @@ app.use("/public", express.static("public"));
 app.use('/register', registerRouter);
 app.use('/login', loginRouter);
 app.use('/profile', profileRouter);
+app.use('/friends', friendRouter);
 app.use('/group-actions', groupActionsRouter);
 app.use('/chat', chatRouter);
 

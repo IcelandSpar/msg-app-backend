@@ -21,8 +21,6 @@ model User {
   password String @db.VarChar(255)
 
   Profile Profile?
-
-  FriendRequest FriendRequest[]
 }
 
 model Profile {
@@ -55,8 +53,6 @@ model FriendRequest {
   SenderId   String
   Receiver   Profile @relation("Receiver", fields: [ReceiverId], references: [id])
   ReceiverId String
-  User       User?   @relation(fields: [userId], references: [id])
-  userId     String?
 
   @@unique([SenderId, ReceiverId])
 }
