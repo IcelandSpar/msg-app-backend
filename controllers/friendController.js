@@ -1,4 +1,5 @@
 const prisma = require("../db/prismaClient.js");
+const { returnUserObjFromToken } = require('../utils/userQuery.js');
 
 const sendFriendReq = async (req, res) => {
   if (req.body.friendCode && req.body.profileIdRequesting) {
@@ -44,6 +45,31 @@ const sendFriendReq = async (req, res) => {
   }
 };
 
+const getPendingFriendReq = async (req, res) => {
+
+  try {
+    const pendingFriendRequests = await prisma.friendRequest.findMany({
+      where: {
+        ReceiverId: req.params.receiverProfileId,
+        status: 'PENDING',
+      },
+      include: {
+        Sender: true,
+      }
+    });
+
+    return res.status(200).json(pendingFriendRequests);
+  } catch (err) {
+    if(err) {
+      return res.status(401).json({
+        message: 'Something went wrong...'
+      })
+    }
+  }
+  
+}
+
 module.exports = {
   sendFriendReq,
+  getPendingFriendReq,
 };
