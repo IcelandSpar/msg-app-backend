@@ -58,12 +58,12 @@ model FriendRequest {
 }
 
 model Friend {
-  id          String @id @default(uuid())
+  id          String   @id @default(uuid())
   friendOneId String
   friendTwoId String
-
-  friendOne Profile @relation("friendOne", fields: [friendOneId], references: [id])
-  friendTwo Profile @relation("friendTwo", fields: [friendTwoId], references: [id])
+  createdAt   DateTime @default(now())
+  friendOne   Profile  @relation("friendOne", fields: [friendOneId], references: [id])
+  friendTwo   Profile  @relation("friendTwo", fields: [friendTwoId], references: [id])
 
   @@unique([friendOneId, friendTwoId])
 }

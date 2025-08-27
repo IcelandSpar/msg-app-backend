@@ -48,17 +48,16 @@ const sendFriendReq = async (req, res) => {
 const getPendingFriendReq = async (req, res) => {
 
   try {
-    const pendingFriendRequests = await prisma.friendRequest.findMany({
+    const friendRequests = await prisma.friendRequest.findMany({
       where: {
         ReceiverId: req.params.receiverProfileId,
-        status: 'PENDING',
       },
       include: {
         Sender: true,
       }
     });
 
-    return res.status(200).json(pendingFriendRequests);
+    return res.status(200).json(friendRequests);
   } catch (err) {
     if(err) {
       return res.status(401).json({
@@ -67,9 +66,63 @@ const getPendingFriendReq = async (req, res) => {
     }
   }
   
+};
+
+const updateReceiverFriendReq = async (req, res) => {
+  try {
+
+    const parsedUserFriendReqSelection = req.query.isFriendReqAccepted == 'true' ? 'ACCEPTED' : 'DECLINED';
+
+  // update friend request to ACCEPTED or DECLINED
+
+    const updatedFriendReq = await prisma.friendRequest.update({
+      where: {
+        id: req.params.notificationId,
+      },
+      data: {
+        status: parsedUserFriendReqSelection,
+      }
+    });
+
+  // create friend link
+  
+
+    const createdFriendLink = await prisma.friend.create({
+      data: {
+        friendOneId: updatedFriendReq.ReceiverId,
+        friendTwoId: updatedFriendReq.SenderId,
+      },
+      include: {
+        friendTwo: true,
+      }
+    })
+
+  // return updated friend requests for front end notifications
+
+    const updatedFriendRequests = await prisma.friendRequest.findMany({
+      where: {
+        ReceiverId: req.params.receiverProfileId,
+      },
+      include: {
+        Sender: true,
+      }
+    });
+
+    return res.status(200).json({
+      updatedFriendRequests,
+      success: true,
+      senderProfile: createdFriendLink.friendTwo,
+    });
+
+  } catch (err) {
+    return res.status(401).json({
+      message: 'Something went wrong. Try again later...',
+    });
+  }
 }
 
 module.exports = {
   sendFriendReq,
   getPendingFriendReq,
+  updateReceiverFriendReq,
 };
