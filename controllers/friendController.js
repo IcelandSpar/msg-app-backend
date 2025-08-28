@@ -1,6 +1,26 @@
 const prisma = require("../db/prismaClient.js");
 const { returnUserObjFromToken } = require('../utils/userQuery.js');
 
+const getProfileFriends = async (req, res) => {
+  const profileFriendList = await prisma.friend.findMany({
+    where: {
+        OR: [
+          {
+            friendOneId: req.params.profileId,
+          },
+          {
+            friendTwoId: req.params.profileId
+          }
+        ]    },
+        include: {
+          friendOne: true,
+          friendTwo: true,
+        }
+  });
+
+  return res.json(profileFriendList)
+}
+
 const sendFriendReq = async (req, res) => {
   if (req.body.friendCode && req.body.profileIdRequesting) {
     const reqReceiver = await prisma.profile.findFirst({
@@ -122,6 +142,7 @@ const updateReceiverFriendReq = async (req, res) => {
 }
 
 module.exports = {
+  getProfileFriends,
   sendFriendReq,
   getPendingFriendReq,
   updateReceiverFriendReq,

@@ -2,7 +2,9 @@ const { Router } = require('express');
 const friendRouter = Router();
 const passport = require('passport');
 
-const { sendFriendReq, getPendingFriendReq, updateReceiverFriendReq } = require('../controllers/friendController.js');
+const { getProfileFriends, sendFriendReq, getPendingFriendReq, updateReceiverFriendReq } = require('../controllers/friendController.js');
+
+friendRouter.get('/get-profile-friend-list/:profileId', passport.authorize('jwt', { session: false }), getProfileFriends);
 
 friendRouter.post('/send-friend-req', passport.authenticate('jwt', { session: false }), sendFriendReq);
 
