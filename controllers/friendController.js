@@ -1,25 +1,33 @@
 const prisma = require("../db/prismaClient.js");
-const { returnUserObjFromToken } = require('../utils/userQuery.js');
+const { returnUserObjFromToken } = require("../utils/userQuery.js");
 
 const getProfileFriends = async (req, res) => {
-  const profileFriendList = await prisma.friend.findMany({
-    where: {
+  try {
+    const profileFriendList = await prisma.friend.findMany({
+      where: {
         OR: [
           {
             friendOneId: req.params.profileId,
           },
           {
-            friendTwoId: req.params.profileId
-          }
-        ]    },
-        include: {
-          friendOne: true,
-          friendTwo: true,
-        }
-  });
+            friendTwoId: req.params.profileId,
+          },
+        ],
+      },
+      include: {
+        friendOne: true,
+        friendTwo: true,
+      },
+    });
 
-  return res.json(profileFriendList)
-}
+    return res.status(200).json(profileFriendList);
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({
+      message: "Something went wrong...",
+    });
+  }
+};
 
 const sendFriendReq = async (req, res) => {
   if (req.body.friendCode && req.body.profileIdRequesting) {
@@ -28,17 +36,22 @@ const sendFriendReq = async (req, res) => {
         friendCode: req.body.friendCode,
       },
     });
-    if (reqReceiver && (reqReceiver.id != req.body.profileIdRequesting)) {
-      const checkForPendingReq = await prisma.friendRequest.findFirst({
+    if (reqReceiver && reqReceiver.id != req.body.profileIdRequesting) {
+      const checkIfAlreadyFriends = await prisma.friend.findMany({
         where: {
-          
-          SenderId: req.body.profileIdRequesting,
-          ReceiverId: reqReceiver.id,
-          status: "PENDING",
-        },
+          OR: [
+            {
+              friendOneId: reqReceiver.id,
+            },
+            {
+              friendTwoId: reqReceiver.id
+            }
+          ]
+        }
       });
 
-      if (!checkForPendingReq) {
+
+      if (checkIfAlreadyFriends.length == 0) {
         const friendReqCreated = await prisma.friendRequest.create({
           data: {
             SenderId: req.body.profileIdRequesting,
@@ -66,7 +79,6 @@ const sendFriendReq = async (req, res) => {
 };
 
 const getPendingFriendReq = async (req, res) => {
-
   try {
     const friendRequests = await prisma.friendRequest.findMany({
       where: {
@@ -74,26 +86,25 @@ const getPendingFriendReq = async (req, res) => {
       },
       include: {
         Sender: true,
-      }
+      },
     });
 
     return res.status(200).json(friendRequests);
   } catch (err) {
-    if(err) {
+    if (err) {
       return res.status(401).json({
-        message: 'Something went wrong...'
-      })
+        message: "Something went wrong...",
+      });
     }
   }
-  
 };
 
 const updateReceiverFriendReq = async (req, res) => {
   try {
+    const parsedUserFriendReqSelection =
+      req.query.isFriendReqAccepted == "true" ? "ACCEPTED" : "DECLINED";
 
-    const parsedUserFriendReqSelection = req.query.isFriendReqAccepted == 'true' ? 'ACCEPTED' : 'DECLINED';
-
-  // update friend request to ACCEPTED or DECLINED
+    // update friend request to ACCEPTED or DECLINED
 
     const updatedFriendReq = await prisma.friendRequest.update({
       where: {
@@ -101,23 +112,24 @@ const updateReceiverFriendReq = async (req, res) => {
       },
       data: {
         status: parsedUserFriendReqSelection,
-      }
+      },
     });
 
-  // create friend link
-  
+    // create friend link if friend req accepted
 
-    const createdFriendLink = await prisma.friend.create({
-      data: {
-        friendOneId: updatedFriendReq.ReceiverId,
-        friendTwoId: updatedFriendReq.SenderId,
-      },
-      include: {
-        friendTwo: true,
-      }
-    })
+    if (parsedUserFriendReqSelection == "ACCEPTED") {
+      const createdFriendLink = await prisma.friend.create({
+        data: {
+          friendOneId: updatedFriendReq.ReceiverId,
+          friendTwoId: updatedFriendReq.SenderId,
+        },
+        include: {
+          friendTwo: true,
+        },
+      });
+    }
 
-  // return updated friend requests for front end notifications
+    // return updated friend requests for front end notifications
 
     const updatedFriendRequests = await prisma.friendRequest.findMany({
       where: {
@@ -125,21 +137,20 @@ const updateReceiverFriendReq = async (req, res) => {
       },
       include: {
         Sender: true,
-      }
+      },
     });
 
     return res.status(200).json({
       updatedFriendRequests,
-      success: true,
-      senderProfile: createdFriendLink.friendTwo,
+      success: (createdFriendLink ? true : false),
+      senderProfile: createdFriendLink.friendTwo || null,
     });
-
   } catch (err) {
     return res.status(401).json({
-      message: 'Something went wrong. Try again later...',
+      message: "Something went wrong. Try again later...",
     });
   }
-}
+};
 
 module.exports = {
   getProfileFriends,
