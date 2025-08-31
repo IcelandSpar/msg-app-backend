@@ -44,12 +44,11 @@ const sendFriendReq = async (req, res) => {
               friendOneId: reqReceiver.id,
             },
             {
-              friendTwoId: reqReceiver.id
-            }
-          ]
-        }
+              friendTwoId: reqReceiver.id,
+            },
+          ],
+        },
       });
-
 
       if (checkIfAlreadyFriends.length == 0) {
         const friendReqCreated = await prisma.friendRequest.create({
@@ -142,7 +141,7 @@ const updateReceiverFriendReq = async (req, res) => {
 
     return res.status(200).json({
       updatedFriendRequests,
-      success: (createdFriendLink ? true : false),
+      success: createdFriendLink ? true : false,
       senderProfile: createdFriendLink.friendTwo || null,
     });
   } catch (err) {
@@ -152,9 +151,30 @@ const updateReceiverFriendReq = async (req, res) => {
   }
 };
 
+const deleteFriendReq = async (req, res) => {
+  try {
+    if (req.params.requestId) {
+      const deletedFriendRequest = await prisma.friendRequest.delete({
+        where: {
+          id: req.params.requestId,
+        },
+      });
+      return res.status(200).json({
+        success: true,
+        message: 'Friend request dismissed',
+        deletedFriendRequest,
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: "Something went wrong..." });
+  }
+};
+
 module.exports = {
   getProfileFriends,
   sendFriendReq,
   getPendingFriendReq,
   updateReceiverFriendReq,
+  deleteFriendReq,
 };
