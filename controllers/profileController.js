@@ -19,6 +19,22 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    const profile = await prisma.profile.findFirst({
+      where: {
+        id: req.params.profileId,
+      }
+    });
+
+    return res.status(200).json(profile);
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: 'Something went wrong...' })
+  }
+};
+
 module.exports = {
   getUserProfile,
+  getProfile,
 }
