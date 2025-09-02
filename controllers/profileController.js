@@ -1,6 +1,5 @@
-const prisma = require('../db/prismaClient.js');
-const { returnUserObjFromToken } = require('../utils/userQuery.js');
-
+const prisma = require("../db/prismaClient.js");
+const { returnUserObjFromToken } = require("../utils/userQuery.js");
 
 const getUserProfile = async (req, res) => {
   try {
@@ -8,13 +7,36 @@ const getUserProfile = async (req, res) => {
     const userProfile = await prisma.profile.findFirst({
       where: {
         userId: user.id,
-      }
+      },
     });
     return res.status(200).json({ profile: userProfile });
   } catch (err) {
-    if(err) {
-    return res.status(401).json({ message: 'Something went wrong' })
+    if (err) {
+      return res.status(401).json({ message: "Something went wrong" });
+    }
+  }
+};
 
+const updateProfileInfo = async (req, res) => {
+  try {
+    const updatedProfile = await prisma.profile.update({
+      where: {
+        id: req.body.profileId,
+      },
+      data: {
+        profileName: req.body.profileName,
+        bio: req.body.bio,
+      }
+    });
+    if(updatedProfile) {
+      return res.status(200).json({ success: true, message: 'Your profile was updated!' });
+    } else {
+      return res.status(404).json({ success: false , message: 'Something went wrong...' });
+    }
+  } catch (err) {
+    if(err) {
+      console.error(err);
+      return res.status(401).json({ success: false, message: 'Something went wrong...' })
     }
   }
 };
@@ -24,17 +46,18 @@ const getProfile = async (req, res) => {
     const profile = await prisma.profile.findFirst({
       where: {
         id: req.params.profileId,
-      }
+      },
     });
 
     return res.status(200).json(profile);
   } catch (err) {
     console.error(err);
-    return res.status(401).json({ message: 'Something went wrong...' })
+    return res.status(401).json({ message: "Something went wrong..." });
   }
 };
 
 module.exports = {
   getUserProfile,
+  updateProfileInfo,
   getProfile,
-}
+};
