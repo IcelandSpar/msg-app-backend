@@ -18,15 +18,26 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateProfileInfo = async (req, res) => {
+
+
+
   try {
+
+    const dataObjCheckForFile = req.file ? {
+        profileName: req.body.profileName,
+        bio: req.body.bio,
+        profileImgFilePath: req.file.path,
+      } : {
+        profileName: req.body.profileName,
+        bio: req.body.bio,
+      };
+
+
     const updatedProfile = await prisma.profile.update({
       where: {
         id: req.body.profileId,
       },
-      data: {
-        profileName: req.body.profileName,
-        bio: req.body.bio,
-      }
+      data: dataObjCheckForFile,
     });
     if(updatedProfile) {
       return res.status(200).json({ success: true, message: 'Your profile was updated!' });
