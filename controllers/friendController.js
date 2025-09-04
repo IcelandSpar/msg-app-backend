@@ -1,6 +1,31 @@
 const prisma = require("../db/prismaClient.js");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
 
+const checkIfFriend = async (req, res) => {
+  try {
+    const isFriend = await prisma.friend.findFirst({
+      where: {
+        OR: [
+          {
+            friendOneId: req.params.userProfileId,
+            friendTwoId: req.params.userFriendProfileId,
+          },
+          {
+            friendOneId: req.params.userFriendProfileId,
+            friendTwoId: req.params.userProfileId,
+          },
+        ],
+      },
+    });
+
+    return res.status(200).json(!!isFriend);
+  } catch (err) {
+    if (err) {
+      return res.status(404).json({ message: "Something went wrong..." });
+    }
+  }
+};
+
 const getProfileFriends = async (req, res) => {
   try {
     const profileFriendList = await prisma.friend.findMany({
@@ -161,7 +186,7 @@ const deleteFriendReq = async (req, res) => {
       });
       return res.status(200).json({
         success: true,
-        message: 'Friend request dismissed',
+        message: "Friend request dismissed",
         deletedFriendRequest,
       });
     }
@@ -171,10 +196,58 @@ const deleteFriendReq = async (req, res) => {
   }
 };
 
+const deleteFriendAndRequests = async (req, res) => {
+  try {
+    const deletedFriend = await prisma.friend.deleteMany({
+      where: {
+        OR: [
+          {
+            friendOneId: req.params.userProfileId,
+            friendTwoId: req.params.userFriendProfileId,
+          },
+          {
+            friendOneId: req.params.userFriendProfileId,
+            friendTwoId: req.params.userProfileId,
+          },
+        ],
+      },
+    });
+
+    await prisma.friendRequest.deleteMany({
+      where: {
+        OR: [
+          {
+            SenderId: req.params.userProfileId,
+            ReceiverId: req.params.userFriendProfileId,
+          },
+          {
+            SenderId: req.params.userFriendProfileId,
+            ReceiverId: req.params.userProfileId,
+          }
+        ]
+      }
+    });
+
+    if (deletedFriend) {
+      return res.status(200).json({
+        success: true,
+        message: "User unfriended",
+        deletedFriend,
+      });
+    }
+  } catch (err) {
+    if (err) {
+      return res.status(404).json({ success: false ,message: "Something went wrong..." });
+    }
+  }
+};
+
 module.exports = {
+  checkIfFriend,
   getProfileFriends,
   sendFriendReq,
   getPendingFriendReq,
   updateReceiverFriendReq,
   deleteFriendReq,
+  deleteFriendAndRequests,
 };
