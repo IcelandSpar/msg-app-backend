@@ -109,12 +109,12 @@ const getPendingFriendReq = async (req, res) => {
         ReceiverId: req.params.receiverProfileId,
         OR: [
           {
-            status: "PENDING"
+            status: "PENDING",
           },
           {
             status: "ACCEPTED",
-          }
-        ]
+          },
+        ],
       },
       include: {
         Sender: true,
@@ -133,6 +133,8 @@ const getPendingFriendReq = async (req, res) => {
 
 const updateReceiverFriendReq = async (req, res) => {
   try {
+    let createdFriendLink = null;
+    let profileFriendList = null;
     const parsedUserFriendReqSelection =
       req.query.isFriendReqAccepted == "true" ? "ACCEPTED" : "DECLINED";
 
@@ -150,7 +152,7 @@ const updateReceiverFriendReq = async (req, res) => {
     // create friend link if friend req accepted
 
     if (parsedUserFriendReqSelection == "ACCEPTED") {
-      const createdFriendLink = await prisma.friend.create({
+      createdFriendLink = await prisma.friend.create({
         data: {
           friendOneId: updatedFriendReq.ReceiverId,
           friendTwoId: updatedFriendReq.SenderId,
@@ -159,6 +161,23 @@ const updateReceiverFriendReq = async (req, res) => {
           friendTwo: true,
         },
       });
+
+      profileFriendList = await prisma.friend.findMany({
+      where: {
+        OR: [
+          {
+            friendOneId: req.params.receiverProfileId,
+          },
+          {
+            friendTwoId: req.params.receiverProfileId,
+          },
+        ],
+      },
+      include: {
+        friendOne: true,
+        friendTwo: true,
+      },
+    });
     }
 
     // return updated friend requests for front end notifications
@@ -171,9 +190,9 @@ const updateReceiverFriendReq = async (req, res) => {
             status: "ACCEPTED",
           },
           {
-            status: "PENDING"
-          }
-        ]
+            status: "PENDING",
+          },
+        ],
       },
       include: {
         Sender: true,
@@ -184,11 +203,15 @@ const updateReceiverFriendReq = async (req, res) => {
       updatedFriendRequests,
       success: createdFriendLink ? true : false,
       senderProfile: createdFriendLink.friendTwo || null,
+      profileFriendList,
     });
   } catch (err) {
-    return res.status(401).json({
-      message: "Something went wrong. Try again later...",
-    });
+    if (err) {
+      console.error(err)
+      return res.status(401).json({
+        message: "Something went wrong. Try again later...",
+      });
+    }
   }
 };
 
@@ -239,9 +262,9 @@ const deleteFriendAndRequests = async (req, res) => {
           {
             SenderId: req.params.userFriendProfileId,
             ReceiverId: req.params.userProfileId,
-          }
-        ]
-      }
+          },
+        ],
+      },
     });
 
     if (deletedFriend) {
@@ -253,7 +276,9 @@ const deleteFriendAndRequests = async (req, res) => {
     }
   } catch (err) {
     if (err) {
-      return res.status(404).json({ success: false ,message: "Something went wrong..." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Something went wrong..." });
     }
   }
 };
