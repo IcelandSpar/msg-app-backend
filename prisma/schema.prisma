@@ -35,13 +35,16 @@ model Profile {
   friendRequestSender   FriendRequest[] @relation("Sender")
   friendRequestReceiver FriendRequest[] @relation("Receiver")
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String    @unique
-  friendOne Friend[]  @relation("friendOne")
-  friendTwo Friend[]  @relation("friendTwo")
-  Message   Message[]
-  Member    Member[]
-  Group     Group[]
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String              @unique
+  friendOne            Friend[]            @relation("friendOne")
+  friendTwo            Friend[]            @relation("friendTwo")
+  Message              Message[]
+  Member               Member[]
+  Group                Group[]
+  DirectMessageGroup   DirectMessageGroup? @relation(fields: [directMessageGroupId], references: [id])
+  directMessageGroupId String?
+  DirectMessage        DirectMessage[]
 }
 
 model FriendRequest {
@@ -66,6 +69,26 @@ model Friend {
   friendTwo   Profile  @relation("friendTwo", fields: [friendTwoId], references: [id])
 
   @@unique([friendOneId, friendTwoId])
+}
+
+model DirectMessageGroup {
+  id            String          @id @default(uuid())
+  profiles      Profile[]
+  DirectMessage DirectMessage[]
+}
+
+model DirectMessage {
+  id                 String   @id @default(uuid())
+  attatchedImagePath String?  @db.VarChar(260)
+  messageContent     String?  @db.VarChar(2000)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  authorId String
+  author   Profile @relation(fields: [authorId], references: [id])
+
+  directMessageGroupId String
+  directMessageGroup   DirectMessageGroup @relation(fields: [directMessageGroupId], references: [id])
 }
 
 model Group {
@@ -95,10 +118,11 @@ model Member {
 }
 
 model Message {
-  id             String   @id @default(uuid())
-  messageContent String   @db.VarChar(2000)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  attatchedImagePath String?  @db.VarChar(260)
+  messageContent     String?  @db.VarChar(2000)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   groupId       String
   group         Group        @relation(fields: [groupId], references: [id])
