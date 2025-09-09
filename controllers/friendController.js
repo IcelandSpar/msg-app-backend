@@ -178,7 +178,42 @@ const updateReceiverFriendReq = async (req, res) => {
         friendTwo: true,
       },
     });
+
+
+    // creates DM-Group and conects both users to DM-group
+
+    const createdDirectMessageGroup = await prisma.directMessageGroup.create({
+      data: {
+        profiles: {
+          connect: {
+            id: updatedFriendReq.ReceiverId,
+
+          },
+        },
+   
+      },
+    });
+
+    await prisma.directMessageGroup.update({
+      where: {
+        id: createdDirectMessageGroup.id,
+      },
+      data: {
+        profiles: {
+          connect: {
+            id: updatedFriendReq.SenderId,
+          }
+        }
+      }
+    })
+
+////////////
+
+
+
     }
+
+
 
     // return updated friend requests for front end notifications
 

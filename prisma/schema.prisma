@@ -35,16 +35,15 @@ model Profile {
   friendRequestSender   FriendRequest[] @relation("Sender")
   friendRequestReceiver FriendRequest[] @relation("Receiver")
 
-  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId               String              @unique
-  friendOne            Friend[]            @relation("friendOne")
-  friendTwo            Friend[]            @relation("friendTwo")
-  Message              Message[]
-  Member               Member[]
-  Group                Group[]
-  DirectMessageGroup   DirectMessageGroup? @relation(fields: [directMessageGroupId], references: [id])
-  directMessageGroupId String?
-  DirectMessage        DirectMessage[]
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String               @unique
+  friendOne          Friend[]             @relation("friendOne")
+  friendTwo          Friend[]             @relation("friendTwo")
+  Message            Message[]
+  Member             Member[]
+  Group              Group[]
+  DirectMessageGroup DirectMessageGroup[]
+  DirectMessage      DirectMessage[]
 }
 
 model FriendRequest {
@@ -88,7 +87,7 @@ model DirectMessage {
   author   Profile @relation(fields: [authorId], references: [id])
 
   directMessageGroupId String
-  directMessageGroup   DirectMessageGroup @relation(fields: [directMessageGroupId], references: [id])
+  directMessageGroup   DirectMessageGroup @relation(fields: [directMessageGroupId], references: [id], onDelete: Cascade)
 }
 
 model Group {
@@ -125,9 +124,9 @@ model Message {
   updatedAt          DateTime @updatedAt
 
   groupId       String
-  group         Group        @relation(fields: [groupId], references: [id])
+  group         Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   authorId      String
-  messageAuthor Profile      @relation(fields: [authorId], references: [id])
+  messageAuthor Profile      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   MessageImg    MessageImg[]
 }
 
