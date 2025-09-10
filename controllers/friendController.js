@@ -250,6 +250,41 @@ const updateReceiverFriendReq = async (req, res) => {
   }
 };
 
+const getFriendDirectMessageGroup = async (req, res) => {
+  try {
+    const directMessageGroup = await prisma.directMessageGroup.findFirst({
+      include: {
+        profiles: {
+          where: {
+            AND: [
+              {
+                id: req.params.senderId,
+              },
+              {
+                id: req.params.receiverId,
+              }
+            ]
+          }
+        }
+      }
+    });
+    
+    return res.status(200).json({
+      directMessageGroup: directMessageGroup,
+      success: true,
+    })
+  } catch (err) {
+    if(err) {
+      console.error(err);
+      return res.status(401).json({
+        message: 'Something went wrong...',
+        success: false,
+      })
+    }
+  }
+};
+
+
 const deleteFriendReq = async (req, res) => {
   try {
     if (req.params.requestId) {
@@ -324,6 +359,7 @@ module.exports = {
   sendFriendReq,
   getPendingFriendReq,
   updateReceiverFriendReq,
+  getFriendDirectMessageGroup,
   deleteFriendReq,
   deleteFriendAndRequests,
 };

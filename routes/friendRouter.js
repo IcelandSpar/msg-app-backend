@@ -8,6 +8,7 @@ const {
   sendFriendReq,
   getPendingFriendReq,
   updateReceiverFriendReq,
+  getFriendDirectMessageGroup,
   deleteFriendReq,
   deleteFriendAndRequests,
 } = require("../controllers/friendController.js");
@@ -40,6 +41,12 @@ friendRouter.put(
   "/update-receiver-friend-req/:receiverProfileId/:notificationId",
   passport.authenticate("jwt", { session: false }),
   updateReceiverFriendReq
+);
+
+friendRouter.get(
+  "/get-direct-message-group/:senderId/:receiverId",
+  passport.authenticate("jwt", { session: false }),
+  getFriendDirectMessageGroup
 );
 
 friendRouter.delete(
