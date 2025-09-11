@@ -10,6 +10,7 @@ const registerRouter = require('./routes/registerRouter.js');
 const friendRouter = require('./routes/friendRouter.js');
 const profileRouter = require('./routes/profileRouter.js');
 const groupActionsRouter = require('./routes/groupActionsRouter.js');
+const directMessageRouter = require('./routes/directMessageRouter.js');
 const chatRouter = require('./routes/chatRouter.js');
 
 const jwt = require('jsonwebtoken');
@@ -23,6 +24,7 @@ app.use('/register', registerRouter);
 app.use('/login', loginRouter);
 app.use('/profile', profileRouter);
 app.use('/friends', friendRouter);
+app.use('/direct-message', directMessageRouter)
 app.use('/group-actions', groupActionsRouter);
 app.use('/chat', chatRouter);
 
