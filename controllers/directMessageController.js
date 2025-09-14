@@ -33,7 +33,7 @@ const postMessage = async (req, res) => {
 
     const updatedDirectMessages = await prisma.directMessage.findMany({
       where: {
-        directMessageGroupId: directMessageGroupId,
+        directMessageGroupId: req.body.directMessageGroupId,
       },
       orderBy: {
         createdAt: "asc",
