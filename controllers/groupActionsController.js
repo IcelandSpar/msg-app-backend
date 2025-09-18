@@ -29,6 +29,24 @@ const getMemberGroups = async (req, res) => {
   }
 };
 
+const getSearchedGroups = async (req, res) => {
+  try {
+    const matchingGroups = await prisma.group.findMany({
+      where: {
+
+            groupName: {
+              contains: req.params.groupNameSearchnig,
+            },
+      },
+    });
+
+    return res.status(200).json(matchingGroups);
+  } catch (err) {
+    console.error(err);
+    return res.status(404).json({ message: "Something went wrong..." });
+  }
+};
+
 const createGroup = async (req, res) => {
   try {
     const user = returnUserObjFromToken(req.headers.authorization);
@@ -79,7 +97,7 @@ const getGroupChatMessages = async (req, res) => {
       },
       include: {
         messageAuthor: true,
-      }
+      },
     });
 
     return res.status(200).json(groupChatMsgs);
@@ -88,10 +106,9 @@ const getGroupChatMessages = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   getMemberGroups,
+  getSearchedGroups,
   createGroup,
   getGroupChatMessages,
 };

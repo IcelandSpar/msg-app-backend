@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const {
   getMemberGroups,
+  getSearchedGroups,
   createGroup,
   getGroupChatMessages,
 } = require("../controllers/groupActionsController");
@@ -38,7 +39,6 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-
 groupActionsRouter.get(
   "/get-group-chat-msgs/:groupId",
   passport.authenticate("jwt", { session: false }),
@@ -49,6 +49,12 @@ groupActionsRouter.get(
   "/get-member-groups",
   passport.authenticate("jwt", { session: false }),
   getMemberGroups
+);
+
+groupActionsRouter.get(
+  "/get-searched-groups/:groupNameSearching",
+  passport.authenticate("jwt", { session: false }),
+  getSearchedGroups
 );
 
 groupActionsRouter.post(
