@@ -31,16 +31,21 @@ const getMemberGroups = async (req, res) => {
 
 const getSearchedGroups = async (req, res) => {
   try {
+    let parsedResults = [];
     const matchingGroups = await prisma.group.findMany({
       where: {
 
             groupName: {
-              contains: req.params.groupNameSearchnig,
+              contains: req.params.groupNameSearching,
             },
       },
     });
 
-    return res.status(200).json(matchingGroups);
+    matchingGroups.forEach((item, indx) => {
+      parsedResults.push({group: item})
+    });
+
+    return res.status(200).json(parsedResults);
   } catch (err) {
     console.error(err);
     return res.status(404).json({ message: "Something went wrong..." });
