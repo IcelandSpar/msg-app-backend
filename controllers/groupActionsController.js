@@ -31,23 +31,48 @@ const getMemberGroups = async (req, res) => {
 
 const getSearchedGroups = async (req, res) => {
   try {
-    let parsedResults = [];
-    const matchingGroups = await prisma.group.findMany({
-      where: {
-
-            groupName: {
-              contains: req.params.groupNameSearching,
+    if (req.params.profileId && req.params.groupNameSearching) {
+      let parsedResults = [];
+      const matchingGroups = await prisma.group.findMany({
+        where: {
+          groupName: {
+            contains: req.params.groupNameSearching,
+            mode: "insensitive",
+          },
+          AND: [
+            {
+              Member: {
+                none: {
+                  profileId: req.params.profileId,
+                },
+              },
             },
-      },
-    });
+          ],
+        },
+      });
 
-    matchingGroups.forEach((item, indx) => {
-      parsedResults.push({group: item})
-    });
+      matchingGroups.forEach((item, indx) => {
+        parsedResults.push({ group: item });
+      });
 
-    return res.status(200).json(parsedResults);
+      return res.status(200).json(parsedResults);
+    }
   } catch (err) {
     console.error(err);
+    return res.status(404).json({ message: "Something went wrong..." });
+  }
+};
+
+const getGroupInfo = async (req, res) => {
+  try {
+    const groupInfo = await prisma.group.findFirst({
+      where: {
+        id: req.params.groupId,
+      },
+    });
+    return res.status(200).json(groupInfo);
+  } catch (err) {
+    console.log(err);
     return res.status(404).json({ message: "Something went wrong..." });
   }
 };
@@ -114,6 +139,7 @@ const getGroupChatMessages = async (req, res) => {
 module.exports = {
   getMemberGroups,
   getSearchedGroups,
+  getGroupInfo,
   createGroup,
   getGroupChatMessages,
 };

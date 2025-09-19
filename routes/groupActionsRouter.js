@@ -2,6 +2,7 @@ const { Router } = require("express");
 const {
   getMemberGroups,
   getSearchedGroups,
+  getGroupInfo,
   createGroup,
   getGroupChatMessages,
 } = require("../controllers/groupActionsController");
@@ -52,10 +53,16 @@ groupActionsRouter.get(
 );
 
 groupActionsRouter.get(
-  "/get-searched-groups/:groupNameSearching",
+  "/get-searched-groups/:groupNameSearching/:profileId",
   passport.authenticate("jwt", { session: false }),
   getSearchedGroups
 );
+
+groupActionsRouter.get(
+  '/get-group-info/:groupId',
+  passport.authenticate('jwt', {session: false}),
+  getGroupInfo
+)
 
 groupActionsRouter.post(
   "/create",
