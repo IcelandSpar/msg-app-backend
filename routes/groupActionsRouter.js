@@ -4,6 +4,7 @@ const {
   getSearchedGroups,
   getGroupInfo,
   createGroup,
+  joinGroup,
   getGroupChatMessages,
 } = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
@@ -62,7 +63,12 @@ groupActionsRouter.get(
   '/get-group-info/:groupId',
   passport.authenticate('jwt', {session: false}),
   getGroupInfo
-)
+);
+
+groupActionsRouter.post(
+  '/join-group/:groupId/:profileId',
+passport.authenticate('jwt', { session: false }),
+joinGroup)
 
 groupActionsRouter.post(
   "/create",

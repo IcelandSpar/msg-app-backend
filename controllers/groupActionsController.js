@@ -119,6 +119,42 @@ const createGroup = async (req, res) => {
 
 const joinRoom = () => {};
 
+const joinGroup = async (req, res) => {
+  try {
+    await prisma.member.create({
+      data: {
+        role: 'USER',
+        profileId: req.params.profileId,
+        groupId: req.params.groupId,
+
+      },
+    });
+
+
+
+    const updatedMemberGroups = await prisma.member.findMany({
+      where: {
+        profileId: req.params.profileId,
+      },
+      include: {
+        group: true,
+      },
+    });
+
+
+    return res.status(200).json({
+      updatedMemberGroups: updatedMemberGroups,
+      success: true,
+    });
+
+  } catch (err) {
+    return res.status(401).json({ 
+      message: 'Something went wrong...',
+      success: false,
+     });
+  }
+}
+
 const getGroupChatMessages = async (req, res) => {
   try {
     const groupChatMsgs = await prisma.message.findMany({
@@ -141,5 +177,6 @@ module.exports = {
   getSearchedGroups,
   getGroupInfo,
   createGroup,
+  joinGroup,
   getGroupChatMessages,
 };
