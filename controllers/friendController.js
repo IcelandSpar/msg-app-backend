@@ -1,4 +1,5 @@
 const prisma = require("../db/prismaClient.js");
+const { connect } = require("../routes/directMessageRouter.js");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
 
 const checkIfFriend = async (req, res) => {
@@ -67,13 +68,16 @@ const sendFriendReq = async (req, res) => {
           OR: [
             {
               friendOneId: reqReceiver.id,
+              friendTwoId: req.body.profileIdRequesting,
             },
             {
+              friendOneId: req.body.profileIdRequesting,
               friendTwoId: reqReceiver.id,
             },
           ],
         },
       });
+      console.log(checkIfAlreadyFriends);
 
       if (checkIfAlreadyFriends.length == 0) {
         const friendReqCreated = await prisma.friendRequest.create({
@@ -152,68 +156,22 @@ const updateReceiverFriendReq = async (req, res) => {
     // create friend link if friend req accepted
 
     if (parsedUserFriendReqSelection == "ACCEPTED") {
-      createdFriendLink = await prisma.friend.create({
+      // creates DM-Group and conects both users to DM-group
+
+      const createdDirectMessageGroup = await prisma.directMessageGroup.create({
         data: {
-          friendOneId: updatedFriendReq.ReceiverId,
-          friendTwoId: updatedFriendReq.SenderId,
+          friend: {
+            create: {
+              friendOneId: updatedFriendReq.ReceiverId,
+              friendTwoId: updatedFriendReq.SenderId,
+            }
+          }
         },
         include: {
-          friendTwo: true,
-        },
-      });
-
-      profileFriendList = await prisma.friend.findMany({
-      where: {
-        OR: [
-          {
-            friendOneId: req.params.receiverProfileId,
-          },
-          {
-            friendTwoId: req.params.receiverProfileId,
-          },
-        ],
-      },
-      include: {
-        friendOne: true,
-        friendTwo: true,
-      },
-    });
-
-
-    // creates DM-Group and conects both users to DM-group
-
-    const createdDirectMessageGroup = await prisma.directMessageGroup.create({
-      data: {
-        profiles: {
-          connect: {
-            id: updatedFriendReq.ReceiverId,
-
-          },
-        },
-   
-      },
-    });
-
-    await prisma.directMessageGroup.update({
-      where: {
-        id: createdDirectMessageGroup.id,
-      },
-      data: {
-        profiles: {
-          connect: {
-            id: updatedFriendReq.SenderId,
-          }
+          friend: true,
         }
-      }
-    })
-
-////////////
-
-
-
+      });
     }
-
-
 
     // return updated friend requests for front end notifications
 
@@ -236,13 +194,12 @@ const updateReceiverFriendReq = async (req, res) => {
 
     return res.status(200).json({
       updatedFriendRequests,
-      success: createdFriendLink ? true : false,
-      senderProfile: createdFriendLink.friendTwo || null,
+
       profileFriendList,
     });
   } catch (err) {
     if (err) {
-      console.error(err)
+      console.error(err);
       return res.status(401).json({
         message: "Something went wrong. Try again later...",
       });
@@ -252,38 +209,41 @@ const updateReceiverFriendReq = async (req, res) => {
 
 const getFriendDirectMessageGroup = async (req, res) => {
   try {
-    const directMessageGroup = await prisma.directMessageGroup.findFirst({
-      include: {
-        profiles: {
-          where: {
-            AND: [
-              {
-                id: req.params.senderId,
-              },
-              {
-                id: req.params.receiverId,
-              }
-            ]
-          }
+
+
+
+    const dmGroupId = await prisma.directMessageGroup.findFirst({
+      where: {
+        friend: {
+          OR: [
+            {
+              friendOneId: req.params.senderId,
+              friendTwoId: req.params.receiverId,
+            },
+            {
+              friendOneId: req.params.receiverId,
+              friendTwoId: req.params.senderId,
+            }
+          ]
         }
       }
     });
-    
+
+
     return res.status(200).json({
-      directMessageGroup: directMessageGroup,
+      directMessageGroup: dmGroupId,
       success: true,
-    })
+    });
   } catch (err) {
-    if(err) {
+    if (err) {
       console.error(err);
       return res.status(401).json({
-        message: 'Something went wrong...',
+        message: "Something went wrong...",
         success: false,
-      })
+      });
     }
   }
 };
-
 
 const deleteFriendReq = async (req, res) => {
   try {

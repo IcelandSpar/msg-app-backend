@@ -35,15 +35,14 @@ model Profile {
   friendRequestSender   FriendRequest[] @relation("Sender")
   friendRequestReceiver FriendRequest[] @relation("Receiver")
 
-  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId             String               @unique
-  friendOne          Friend[]             @relation("friendOne")
-  friendTwo          Friend[]             @relation("friendTwo")
-  Message            Message[]
-  Member             Member[]
-  Group              Group[]
-  DirectMessageGroup DirectMessageGroup[]
-  DirectMessage      DirectMessage[]
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String          @unique
+  friendOne     Friend[]        @relation("friendOne")
+  friendTwo     Friend[]        @relation("friendTwo")
+  Message       Message[]
+  Member        Member[]
+  Group         Group[]
+  DirectMessage DirectMessage[]
 }
 
 model FriendRequest {
@@ -60,19 +59,21 @@ model FriendRequest {
 }
 
 model Friend {
-  id          String   @id @default(uuid())
-  friendOneId String
-  friendTwoId String
-  createdAt   DateTime @default(now())
-  friendOne   Profile  @relation("friendOne", fields: [friendOneId], references: [id])
-  friendTwo   Profile  @relation("friendTwo", fields: [friendTwoId], references: [id])
+  id                 String               @id @default(uuid())
+  friendOneId        String
+  friendTwoId        String
+  createdAt          DateTime             @default(now())
+  friendOne          Profile              @relation("friendOne", fields: [friendOneId], references: [id])
+  friendTwo          Profile              @relation("friendTwo", fields: [friendTwoId], references: [id])
+  DirectMessageGroup DirectMessageGroup[]
 
   @@unique([friendOneId, friendTwoId])
 }
 
 model DirectMessageGroup {
   id            String          @id @default(uuid())
-  profiles      Profile[]
+  friendId      String
+  friend        Friend          @relation(fields: [friendId], references: [id])
   DirectMessage DirectMessage[]
 }
 
