@@ -73,7 +73,7 @@ model Friend {
 model DirectMessageGroup {
   id            String          @id @default(uuid())
   friendId      String
-  friend        Friend          @relation(fields: [friendId], references: [id])
+  friend        Friend          @relation(fields: [friendId], references: [id], onDelete: Cascade)
   DirectMessage DirectMessage[]
 }
 

@@ -1,5 +1,4 @@
 const prisma = require("../db/prismaClient.js");
-const { connect } = require("../routes/directMessageRouter.js");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
 
 const checkIfFriend = async (req, res) => {
@@ -267,7 +266,9 @@ const deleteFriendReq = async (req, res) => {
 
 const deleteFriendAndRequests = async (req, res) => {
   try {
-    const deletedFriend = await prisma.friend.deleteMany({
+    let deletedFriend;
+
+    const friendRowToDelete = await prisma.friend.findFirst({
       where: {
         OR: [
           {
@@ -277,9 +278,16 @@ const deleteFriendAndRequests = async (req, res) => {
           {
             friendOneId: req.params.userFriendProfileId,
             friendTwoId: req.params.userProfileId,
-          },
-        ],
-      },
+          }
+        ]
+      }
+    });
+
+
+    deletedFriend = await prisma.friend.delete({
+      where: {
+        id: friendRowToDelete.id,
+      }
     });
 
     await prisma.friendRequest.deleteMany({
@@ -297,19 +305,18 @@ const deleteFriendAndRequests = async (req, res) => {
       },
     });
 
-    if (deletedFriend) {
       return res.status(200).json({
         success: true,
         message: "User unfriended",
         deletedFriend,
       });
-    }
+    
+
   } catch (err) {
-    if (err) {
+    console.error(err)
       return res
         .status(404)
         .json({ success: false, message: "Something went wrong..." });
-    }
   }
 };
 
