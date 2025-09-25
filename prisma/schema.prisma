@@ -99,7 +99,7 @@ model Group {
   updatedAt    DateTime @updatedAt
   creatorId    String
 
-  creator Profile   @relation(fields: [creatorId], references: [id])
+  creator Profile   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   Member  Member[]
   Message Message[]
 }
@@ -113,8 +113,8 @@ model Member {
   profileId String
   groupId   String
 
-  member Profile @relation(fields: [profileId], references: [id])
-  group  Group   @relation(fields: [groupId], references: [id])
+  member Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  group  Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
 model Message {
