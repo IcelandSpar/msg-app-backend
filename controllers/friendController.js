@@ -174,15 +174,32 @@ const updateReceiverFriendReq = async (req, res) => {
 
     // return updated friend requests for front end notifications
 
-    const updatedFriendRequests = await prisma.friendRequest.findMany({
+    profileFriendList = await prisma.friend.findMany({
+      where: {
+        OR: [
+          {
+            friendOneId: req.params.receiverProfileId,
+          },
+          {
+            friendTwoId: req.params.receiverProfileId,
+          },
+        ],
+      },
+      include: {
+        friendOne: true,
+        friendTwo: true,
+      },
+    });
+
+        const friendRequests = await prisma.friendRequest.findMany({
       where: {
         ReceiverId: req.params.receiverProfileId,
         OR: [
           {
-            status: "ACCEPTED",
+            status: "PENDING",
           },
           {
-            status: "PENDING",
+            status: "ACCEPTED",
           },
         ],
       },
@@ -191,10 +208,11 @@ const updateReceiverFriendReq = async (req, res) => {
       },
     });
 
-    return res.status(200).json({
-      updatedFriendRequests,
 
+    return res.status(200).json({
+      updatedFriendRequests: friendRequests,
       profileFriendList,
+      success: true,
     });
   } catch (err) {
     if (err) {
