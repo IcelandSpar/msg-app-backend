@@ -109,9 +109,16 @@ const getPendingFriendReq = async (req, res) => {
   try {
     const friendRequests = await prisma.friendRequest.findMany({
       where: {
-        ReceiverId: req.params.receiverProfileId,
         OR: [
           {
+            OR: [
+              {
+                ReceiverId: req.params.receiverProfileId
+              },
+              {
+                SenderId: req.params.receiverProfileId,
+              }
+            ],
             status: "PENDING",
           },
           {
@@ -121,6 +128,7 @@ const getPendingFriendReq = async (req, res) => {
       },
       include: {
         Sender: true,
+        Receiver: true,
       },
     });
 
