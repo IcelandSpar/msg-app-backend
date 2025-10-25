@@ -61,7 +61,12 @@ const sendFriendReq = async (req, res) => {
         friendCode: req.body.friendCode,
       },
     });
-    if (reqReceiver && reqReceiver.id != req.body.profileIdRequesting) {
+    if(!reqReceiver) {
+          return res.status(200).json({
+            success: true,
+            message: "No matching records... Check if friend code is correctly typed.",
+          });
+    } else if (reqReceiver && reqReceiver.id != req.body.profileIdRequesting) {
       const checkIfAlreadyFriends = await prisma.friend.findMany({
         where: {
           OR: [
