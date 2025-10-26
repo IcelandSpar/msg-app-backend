@@ -123,14 +123,11 @@ const joinGroup = async (req, res) => {
   try {
     await prisma.member.create({
       data: {
-        role: 'USER',
+        role: "USER",
         profileId: req.params.profileId,
         groupId: req.params.groupId,
-
       },
     });
-
-
 
     const updatedMemberGroups = await prisma.member.findMany({
       where: {
@@ -141,19 +138,17 @@ const joinGroup = async (req, res) => {
       },
     });
 
-
     return res.status(200).json({
       updatedMemberGroups: updatedMemberGroups,
       success: true,
     });
-
   } catch (err) {
-    return res.status(401).json({ 
-      message: 'Something went wrong...',
+    return res.status(401).json({
+      message: "Something went wrong...",
       success: false,
-     });
+    });
   }
-}
+};
 
 const getGroupChatMessages = async (req, res) => {
   try {
@@ -172,6 +167,40 @@ const getGroupChatMessages = async (req, res) => {
   }
 };
 
+const getGroupMembers = async (req, res) => {
+  try {
+    const userRoleMembers = await prisma.member.findMany({
+      where: {
+        groupId: req.params.groupId,
+        role: "USER",
+      },
+      include: {
+        member: true,
+      },
+    });
+    const adminRoleMembers = await prisma.member.findMany({
+      where: {
+        groupId: req.params.groupId,
+        role: 'ADMIN',
+      },
+      include: {
+        member: true,
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      userRoleMembers,
+      adminRoleMembers,
+    });
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      message: 'Something went wrong...',
+    })
+  }
+};
+
 module.exports = {
   getMemberGroups,
   getSearchedGroups,
@@ -179,4 +208,5 @@ module.exports = {
   createGroup,
   joinGroup,
   getGroupChatMessages,
+  getGroupMembers,
 };

@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const {
   getMemberGroups,
+  getGroupMembers,
   getSearchedGroups,
   getGroupInfo,
   createGroup,
@@ -51,6 +52,12 @@ groupActionsRouter.get(
   "/get-member-groups",
   passport.authenticate("jwt", { session: false }),
   getMemberGroups
+);
+
+groupActionsRouter.get(
+  '/get-group-members/:groupId',
+  passport.authenticate("jwt", { session: false }),
+  getGroupMembers,
 );
 
 groupActionsRouter.get(
