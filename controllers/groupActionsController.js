@@ -150,6 +150,39 @@ const joinGroup = async (req, res) => {
   }
 };
 
+const leaveGroup = async (req, res) => {
+  try {
+    const memberItemToRemove = await prisma.member.findFirst({
+      where: {
+        groupId: req.params.groupId,
+        profileId: req.params.profileId,
+      },
+    });
+    if (memberItemToRemove) {
+      const removedMember = await prisma.member.delete({
+        where: {
+          id: memberItemToRemove.id,
+        },
+      });
+      return res.status(200).json({
+        success: true,
+        removedMember,
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: "Something went wrong...",
+
+      });
+    }
+  } catch (err) {
+    return res.status(401).json({
+      message: "Something went wrong...",
+      success: false,
+    });
+  }
+};
+
 const getGroupChatMessages = async (req, res) => {
   try {
     const groupChatMsgs = await prisma.message.findMany({
@@ -181,11 +214,11 @@ const getGroupMembers = async (req, res) => {
     const adminRoleMembers = await prisma.member.findMany({
       where: {
         groupId: req.params.groupId,
-        role: 'ADMIN',
+        role: "ADMIN",
       },
       include: {
         member: true,
-      }
+      },
     });
 
     return res.status(200).json({
@@ -196,8 +229,8 @@ const getGroupMembers = async (req, res) => {
   } catch (err) {
     return res.status(401).json({
       success: false,
-      message: 'Something went wrong...',
-    })
+      message: "Something went wrong...",
+    });
   }
 };
 
@@ -207,6 +240,7 @@ module.exports = {
   getGroupInfo,
   createGroup,
   joinGroup,
+  leaveGroup,
   getGroupChatMessages,
   getGroupMembers,
 };

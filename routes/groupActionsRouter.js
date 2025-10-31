@@ -6,6 +6,7 @@ const {
   getGroupInfo,
   createGroup,
   joinGroup,
+  leaveGroup,
   getGroupChatMessages,
 } = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
@@ -75,7 +76,13 @@ groupActionsRouter.get(
 groupActionsRouter.post(
   '/join-group/:groupId/:profileId',
 passport.authenticate('jwt', { session: false }),
-joinGroup)
+joinGroup);
+
+groupActionsRouter.post(
+  '/leave-group/:profileId/:groupId',
+  passport.authenticate('jwt', { session: false }),
+  leaveGroup
+);
 
 groupActionsRouter.post(
   "/create",
