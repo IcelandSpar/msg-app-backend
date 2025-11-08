@@ -3,6 +3,11 @@ const bcrypt = require("bcryptjs");
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 
+const { validationResult, matchedData } = require('express-validator');
+const { validateLogin } = require('../validators/loginValidator.js');
+const { validateProfileInfo } = require('../validators/registerValidator.js');
+
+
 const { checkIfUserExists, deleteFileSubmitted } = require('../utils/userQuery.js');
 
 const returnAvailableFriendCode = async () => {
@@ -31,9 +36,14 @@ const returnAvailableFriendCode = async () => {
 }
 
 
-const createAccount = async (req, res, next) => {
+const createAccount = [ validateProfileInfo, validateLogin, async (req, res, next) => {
   try {
-    if ( await checkIfUserExists(req.body.username) ) {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    } else if ( await checkIfUserExists(req.body.username) ) {
 
       deleteFileSubmitted(req.file);
       
@@ -71,7 +81,7 @@ const createAccount = async (req, res, next) => {
     next(err);
   }
 
-};
+}];
 
 module.exports = {
   createAccount,

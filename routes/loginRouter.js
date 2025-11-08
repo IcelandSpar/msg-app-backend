@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const loginRouter = Router();
 const passport = require("passport");
-const {  validationResult, matchedData } = require("express-validator");
+const {  validationResult } = require("express-validator");
 const { validateLogin } = require("../validators/loginValidator.js");
 const { loginUser } = require("../controllers/loginController.js");
 const jwt = require("jsonwebtoken");
