@@ -39,6 +39,14 @@ const returnAvailableFriendCode = async () => {
 const createAccount = [ validateProfileInfo, validateLogin, async (req, res, next) => {
   try {
     const errors = validationResult(req);
+    if(req.body.password != req.body.confirmPassword) {
+      errors.errors.push({
+        type: 'field',
+        value: '',
+        msg: 'Passwords do not match',
+        location: 'body',
+      })
+    }
     if(!errors.isEmpty()) {
       return res.status(400).json({
         errors: errors.array(),
