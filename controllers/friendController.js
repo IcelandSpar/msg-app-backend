@@ -1,5 +1,8 @@
 const prisma = require("../db/prismaClient.js");
+const { validationResult } = require('express-validator');
+
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
+const { validateAddFriend } = require('../validators/addFriendValidator.js');
 
 const checkIfFriend = async (req, res) => {
   try {
@@ -54,8 +57,15 @@ const getProfileFriends = async (req, res) => {
   }
 };
 
-const sendFriendReq = async (req, res) => {
-  if (req.body.friendCode && req.body.profileIdRequesting) {
+const sendFriendReq = [ validateAddFriend, async (req, res) => {
+
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  } else if (req.body.friendCode && req.body.profileIdRequesting) {
     const reqReceiver = await prisma.profile.findFirst({
       where: {
         friendCode: req.body.friendCode,
@@ -108,7 +118,7 @@ const sendFriendReq = async (req, res) => {
       message: "Something went wrong, please try again later.",
     });
   }
-};
+}];
 
 const getPendingFriendReq = async (req, res) => {
   try {
