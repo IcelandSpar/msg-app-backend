@@ -1,6 +1,8 @@
 const prisma = require("../db/prismaClient.js");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
+const { validateCreateGroup } = require("../validators/groupValidators.js");
 
 const getMemberGroups = async (req, res) => {
   try {
@@ -77,45 +79,56 @@ const getGroupInfo = async (req, res) => {
   }
 };
 
-const createGroup = async (req, res) => {
-  try {
-    const user = returnUserObjFromToken(req.headers.authorization);
+const createGroup = [
+  validateCreateGroup,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
 
-    const userProfile = await prisma.profile.findFirst({
-      where: {
-        userId: user.id,
-      },
-    });
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+        });
+      } else {
+        const user = returnUserObjFromToken(req.headers.authorization);
 
-    const createdGroup = await prisma.group.create({
-      data: {
-        groupName: req.body.groupName,
-        groupImgPath: req.file
-          ? req.file.path
-          : "public/profile-images/anonymous.png",
-        creatorId: userProfile.id,
-      },
-    });
+        const userProfile = await prisma.profile.findFirst({
+          where: {
+            userId: user.id,
+          },
+        });
 
-    const createdMember = await prisma.member.create({
-      data: {
-        role: "ADMIN",
-        profileId: userProfile.id,
-        groupId: createdGroup.id,
-      },
-    });
+        const createdGroup = await prisma.group.create({
+          data: {
+            groupName: req.body.groupName,
+            groupImgPath: req.file
+              ? req.file.path
+              : "public/profile-images/anonymous.png",
+            creatorId: userProfile.id,
+          },
+        });
 
-    res.status(200).json({
-      createdGroup: createdGroup,
-      createdMember: createdMember,
-    });
-  } catch (err) {
-    if (err) {
-      console.error(err);
-      return res.status(400);
+        const createdMember = await prisma.member.create({
+          data: {
+            role: "ADMIN",
+            profileId: userProfile.id,
+            groupId: createdGroup.id,
+          },
+        });
+
+        res.status(200).json({
+          createdGroup: createdGroup,
+          createdMember: createdMember,
+        });
+      }
+    } catch (err) {
+      if (err) {
+        console.error(err);
+        return res.status(400);
+      }
     }
-  }
-};
+  },
+];
 
 const joinRoom = () => {};
 
@@ -172,7 +185,6 @@ const leaveGroup = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Something went wrong...",
-
       });
     }
   } catch (err) {
