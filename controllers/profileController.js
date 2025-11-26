@@ -1,5 +1,9 @@
 const prisma = require("../db/prismaClient.js");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
+const { validationResult } = require("express-validator");
+const {
+  validateProfileUpdate,
+} = require("../validators/updateProfileValidator.js");
 
 const getUserProfile = async (req, res) => {
   try {
@@ -17,40 +21,51 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-const updateProfileInfo = async (req, res) => {
-
-
-
+const updateProfileInfo = [ validateProfileUpdate, async (req, res) => {
   try {
+    const errors = validationResult(req);
 
-    const dataObjCheckForFile = req.file ? {
-        profileName: req.body.profileName,
-        bio: req.body.bio,
-        profileImgFilePath: req.file.path,
-      } : {
-        profileName: req.body.profileName,
-        bio: req.body.bio,
-      };
-
-
-    const updatedProfile = await prisma.profile.update({
-      where: {
-        id: req.body.profileId,
-      },
-      data: dataObjCheckForFile,
-    });
-    if(updatedProfile) {
-      return res.status(200).json({ success: true, message: 'Your profile was updated!' });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
     } else {
-      return res.status(404).json({ success: false , message: 'Something went wrong...' });
+      const dataObjCheckForFile = req.file
+        ? {
+            profileName: req.body.profileName,
+            bio: req.body.bio,
+            profileImgFilePath: req.file.path,
+          }
+        : {
+            profileName: req.body.profileName,
+            bio: req.body.bio,
+          };
+
+      const updatedProfile = await prisma.profile.update({
+        where: {
+          id: req.body.profileId,
+        },
+        data: dataObjCheckForFile,
+      });
+      if (updatedProfile) {
+        return res
+          .status(200)
+          .json({ success: true, message: "Your profile was updated!" });
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Something went wrong..." });
+      }
     }
   } catch (err) {
-    if(err) {
+    if (err) {
       console.error(err);
-      return res.status(401).json({ success: false, message: 'Something went wrong...' })
+      return res
+        .status(401)
+        .json({ success: false, message: "Something went wrong..." });
     }
   }
-};
+}];
 
 const getProfile = async (req, res) => {
   try {
