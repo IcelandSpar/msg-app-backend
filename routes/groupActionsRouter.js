@@ -8,11 +8,13 @@ const {
   joinGroup,
   leaveGroup,
   getGroupChatMessages,
+  checkIfAdminInGroup
 } = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
 
 const multer = require("multer");
 const passport = require("passport");
+const { group } = require("../db/prismaClient");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/group-images");
@@ -48,6 +50,12 @@ groupActionsRouter.get(
   passport.authenticate("jwt", { session: false }),
   getGroupChatMessages
 );
+
+groupActionsRouter.get(
+  "/check-if-admin/:groupId/:profileId",
+  passport.authenticate("jwt", { session: false }),
+  checkIfAdminInGroup
+)
 
 groupActionsRouter.get(
   "/get-member-groups",

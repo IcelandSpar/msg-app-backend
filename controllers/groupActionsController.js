@@ -246,6 +246,28 @@ const getGroupMembers = async (req, res) => {
   }
 };
 
+const checkIfAdminInGroup = async (req, res) => {
+  try {
+    const memberObj = await prisma.member.findFirst({
+      where: {
+        profileId: req.params.profileId,
+        groupId: req.params.groupId,
+      },
+    });
+
+    return res.status(200).json({
+      isAdmin: memberObj && memberObj.role == "ADMIN" ? true : false, 
+
+    });
+  } catch (err) {
+    if(err) {
+      return res.status(401).json({
+        error: "Something went wrong..."
+      })
+    }
+  }
+};
+
 module.exports = {
   getMemberGroups,
   getSearchedGroups,
@@ -255,4 +277,5 @@ module.exports = {
   leaveGroup,
   getGroupChatMessages,
   getGroupMembers,
+  checkIfAdminInGroup
 };
