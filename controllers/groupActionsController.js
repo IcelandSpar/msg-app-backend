@@ -268,6 +268,25 @@ const checkIfAdminInGroup = async (req, res) => {
   }
 };
 
+const removeMember = async (req, res) => {
+  try {
+    const removedMember = await prisma.member.delete({
+      where: {
+        profileId: req.params.profileId,
+        groupId: req.params.groupId,
+      }
+    });
+
+    return res.status(200).json({
+      removedMember,
+    });
+  } catch (err) {
+    return res.status(401).json({
+      error: "Something went wrong...",
+    })
+  }
+};
+
 module.exports = {
   getMemberGroups,
   getSearchedGroups,
@@ -277,5 +296,6 @@ module.exports = {
   leaveGroup,
   getGroupChatMessages,
   getGroupMembers,
-  checkIfAdminInGroup
+  checkIfAdminInGroup,
+  removeMember
 };

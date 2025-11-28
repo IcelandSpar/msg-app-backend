@@ -8,7 +8,8 @@ const {
   joinGroup,
   leaveGroup,
   getGroupChatMessages,
-  checkIfAdminInGroup
+  checkIfAdminInGroup,
+  removeMember,
 } = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
 
@@ -55,7 +56,12 @@ groupActionsRouter.get(
   "/check-if-admin/:groupId/:profileId",
   passport.authenticate("jwt", { session: false }),
   checkIfAdminInGroup
-)
+);
+
+groupActionsRouter.delete(
+  "/remove-member/:groupId/:profileId/:memberId",
+  removeMember,
+);
 
 groupActionsRouter.get(
   "/get-member-groups",
