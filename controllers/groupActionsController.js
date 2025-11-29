@@ -256,34 +256,48 @@ const checkIfAdminInGroup = async (req, res) => {
     });
 
     return res.status(200).json({
-      isAdmin: memberObj && memberObj.role == "ADMIN" ? true : false, 
-
+      isAdmin: memberObj && memberObj.role == "ADMIN" ? true : false,
     });
   } catch (err) {
-    if(err) {
+    if (err) {
       return res.status(401).json({
-        error: "Something went wrong..."
-      })
+        error: "Something went wrong...",
+      });
     }
   }
 };
 
 const removeMember = async (req, res) => {
   try {
-    const removedMember = await prisma.member.delete({
+    const checkIfAdmin = await prisma.member.findFirst({
       where: {
-        profileId: req.params.profileId,
+        profileId: req.params.memberId,
         groupId: req.params.groupId,
-      }
+      },
     });
 
-    return res.status(200).json({
-      removedMember,
-    });
+    if (checkIfAdmin.role == "ADMIN") {
+      const memberToBeRemoved = await prisma.member.findFirst({
+        where: {
+          profileId: req.params.profileId,
+          groupId: req.params.groupId,
+        },
+      });
+
+      const removedMember = await prisma.member.delete({
+        where: {
+          id: memberToBeRemoved.id,
+        },
+      });
+
+      return res.status(200).json({
+        removedMember,
+      });
+    }
   } catch (err) {
     return res.status(401).json({
       error: "Something went wrong...",
-    })
+    });
   }
 };
 
@@ -297,5 +311,5 @@ module.exports = {
   getGroupChatMessages,
   getGroupMembers,
   checkIfAdminInGroup,
-  removeMember
+  removeMember,
 };
