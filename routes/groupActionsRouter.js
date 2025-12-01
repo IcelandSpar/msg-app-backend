@@ -10,6 +10,7 @@ const {
   getGroupChatMessages,
   checkIfAdminInGroup,
   removeMember,
+  promoteToAdmin,
 } = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
 
@@ -60,7 +61,14 @@ groupActionsRouter.get(
 
 groupActionsRouter.delete(
   "/remove-member/:groupId/:profileId/:memberId",
+  passport.authenticate("jwt", { session: false }),
   removeMember,
+);
+
+groupActionsRouter.put(
+  "/promote-to-admin/:groupId/:profileId/:memberId",
+  passport.authenticate("jwt", { session: false }),
+  promoteToAdmin
 );
 
 groupActionsRouter.get(

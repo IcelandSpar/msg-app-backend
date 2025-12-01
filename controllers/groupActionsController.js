@@ -296,7 +296,59 @@ const removeMember = async (req, res) => {
     }
   } catch (err) {
     return res.status(401).json({
-      error: "Something went wrong...",
+      message: "Something went wrong...",
+    });
+  }
+};
+
+const promoteToAdmin = async (req, res) => {
+  try {
+    const adminRequestingPromotion = await prisma.member.findFirst({
+      where: {
+        profileId: req.params.memberId,
+        groupId: req.params.groupId,
+      },
+    });
+
+    if (adminRequestingPromotion.role == "ADMIN") {
+      const memberToPromote = await prisma.member.findFirst({
+        where: {
+          profileId: req.params.profileId,
+          groupId: req.params.groupId,
+        },
+      })
+      const promotedMember = await prisma.member.update({
+        where: {
+          id: memberToPromote.id,
+        },
+        data: {
+          role: "ADMIN",
+        },
+      });
+
+    const adminRoleMembers = await prisma.member.findMany({
+      where: {
+        groupId: req.params.groupId,
+        role: "ADMIN",
+      },
+      include: {
+        member: true,
+      },
+    });
+
+      return res.status(200).json({
+        promotedMember,
+        adminRoleMembers,
+      });
+    } else {
+      return res.status(401).json({
+        message: "Missing credentials..."
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(400).json({
+      message: "Something went wrong...",
     });
   }
 };
@@ -312,4 +364,5 @@ module.exports = {
   getGroupMembers,
   checkIfAdminInGroup,
   removeMember,
+  promoteToAdmin,
 };
