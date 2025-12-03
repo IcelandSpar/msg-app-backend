@@ -6,14 +6,10 @@ const { validateLogin } = require("../validators/loginValidator.js");
 const { loginUser } = require("../controllers/loginController.js");
 const jwt = require("jsonwebtoken");
 
-loginRouter.post("/", validateLogin,(req, res, next) => {
+loginRouter.post("/", validateLogin, (req, res, next) => {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()) {
-      return res.status(400).json({
-        errors: errors.array(),
-    })
-    }
+
     if (!err || user) {
       req.login(user, { session: false }, (err) => {
         delete user["password"];
@@ -22,6 +18,11 @@ loginRouter.post("/", validateLogin,(req, res, next) => {
         });
         return res.json({ token });
       });
+    }
+    if(!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+    })
     }
     if (err || !user) {
       return res.status(401).json({
