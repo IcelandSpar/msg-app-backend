@@ -4,6 +4,28 @@ const { validationResult } = require("express-validator");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
 const { validateCreateGroup } = require("../validators/groupValidators.js");
 
+const checkIfMember = async (req, res) => {
+
+  try {
+    const memberObj = await prisma.member.findFirst({
+      where: {
+        profileId: req.params.profileId,
+        groupId: req.params.groupId,
+      }
+    });
+
+      return res.status(200).json({
+        isMember: memberObj ? true : false,
+      });
+  } catch (err) {
+    console.error(err);
+    return res.status(400).json({
+      message: "Something went wrong...",
+    });
+  }
+
+};
+
 const getMemberGroups = async (req, res) => {
   try {
     const userObj = returnUserObjFromToken(req.headers.authorization);
@@ -354,6 +376,7 @@ const promoteToAdmin = async (req, res) => {
 };
 
 module.exports = {
+  checkIfMember,
   getMemberGroups,
   getSearchedGroups,
   getGroupInfo,

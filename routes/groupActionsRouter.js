@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const {
+  checkIfMember,
   getMemberGroups,
   getGroupMembers,
   getSearchedGroups,
@@ -46,6 +47,12 @@ const upload = multer({
   // dest: './public/profile-images',
   fileFilter: fileFilter,
 });
+
+groupActionsRouter.get(
+  "/check-if-member/:groupId/:profileId",
+  passport.authenticate("jwt", { session: false }),
+  checkIfMember,
+)
 
 groupActionsRouter.get(
   "/get-group-chat-msgs/:groupId",
