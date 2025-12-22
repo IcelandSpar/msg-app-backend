@@ -7,7 +7,9 @@ const { loginUser } = require("../controllers/loginController.js");
 const jwt = require("jsonwebtoken");
 
 loginRouter.post("/", validateLogin, (req, res, next) => {
+  
   passport.authenticate("local", { session: false }, (err, user, info) => {
+
     const errors = validationResult(req);
 
     if (!err || user) {

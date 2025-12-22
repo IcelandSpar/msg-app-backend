@@ -138,16 +138,27 @@ const createGroup = [
           },
         });
 
+    const memberGroups = await prisma.member.findMany({
+      where: {
+        profileId: userProfile.id,
+      },
+      include: {
+        group: true,
+      },
+    });
+
+
         res.status(200).json({
           createdGroup: createdGroup,
           createdMember: createdMember,
+          memberGroups: memberGroups,
         });
       }
     } catch (err) {
-      if (err) {
+
         console.error(err);
         return res.status(400);
-      }
+      
     }
   },
 ];

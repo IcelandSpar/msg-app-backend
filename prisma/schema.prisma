@@ -63,8 +63,8 @@ model Friend {
   friendOneId        String
   friendTwoId        String
   createdAt          DateTime             @default(now())
-  friendOne          Profile              @relation("friendOne", fields: [friendOneId], references: [id])
-  friendTwo          Profile              @relation("friendTwo", fields: [friendTwoId], references: [id])
+  friendOne          Profile              @relation("friendOne", fields: [friendOneId], references: [id], onDelete: Cascade)
+  friendTwo          Profile              @relation("friendTwo", fields: [friendTwoId], references: [id], onDelete: Cascade)
   DirectMessageGroup DirectMessageGroup[]
 
   @@unique([friendOneId, friendTwoId])
