@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const {
   validateProfileUpdate,
 } = require("../validators/updateProfileValidator.js");
+const he = require("he");
 
 const getUserProfile = async (req, res) => {
   try {
@@ -32,13 +33,13 @@ const updateProfileInfo = [ validateProfileUpdate, async (req, res) => {
     } else {
       const dataObjCheckForFile = req.file
         ? {
-            profileName: req.body.profileName,
-            bio: req.body.bio,
-            profileImgFilePath: req.file.path,
+            profileName: he.decode(req.body.profileName),
+            bio: he.decode(req.body.bio),
+            profileImgFilePath: he.decode(req.file.path),
           }
         : {
-            profileName: req.body.profileName,
-            bio: req.body.bio,
+            profileName: he.decode(req.body.profileName),
+            bio: he.decode(req.body.bio),
           };
 
       const updatedProfile = await prisma.profile.update({

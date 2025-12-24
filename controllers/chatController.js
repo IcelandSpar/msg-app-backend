@@ -1,6 +1,7 @@
 const prisma = require("../db/prismaClient.js");
 const { validationResult } = require("express-validator");
 const { validateGroupChatMsg } = require("../validators/msgValidators.js");
+const he = require("he");
 
 const postChatMsg = [
   validateGroupChatMsg,
@@ -15,7 +16,7 @@ const postChatMsg = [
       } else {
         const postedMsg = await prisma.message.create({
           data: {
-            messageContent: req.body.messageContent,
+            messageContent: he.decode(req.body.messageContent),
             groupId: req.body.groupId,
             authorId: req.body.authorId,
           },

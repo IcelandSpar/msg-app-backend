@@ -1,6 +1,7 @@
 const prisma = require("../db/prismaClient.js");
 const { validationResult } = require("express-validator");
 const { validateDirectMsg } = require("../validators/msgValidators.js");
+const he = require("he");
 
 const getDirectMessages = async (req, res) => {
   try {
@@ -70,7 +71,7 @@ const postMessage = [
           data: {
             authorId: req.body.authorId,
             directMessageGroupId: req.body.directMessageGroupId,
-            messageContent: req.body.message,
+            messageContent: he.decode(req.body.message),
           },
         });
 

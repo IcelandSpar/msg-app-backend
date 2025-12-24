@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
 const { validateCreateGroup } = require("../validators/groupValidators.js");
+const he = require("he");
 
 const checkIfMember = async (req, res) => {
 
@@ -122,7 +123,7 @@ const createGroup = [
 
         const createdGroup = await prisma.group.create({
           data: {
-            groupName: req.body.groupName,
+            groupName: he.decode(req.body.groupName),
             groupImgPath: req.file
               ? req.file.path
               : "public/profile-images/anonymous.png",

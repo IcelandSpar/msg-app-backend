@@ -76,7 +76,7 @@ const createAccount = [ validateProfileInfo, validateLogin, async (req, res, nex
         data: {
           profileName: he.decode(req.body.profileName),
           bio: he.decode(req.body.bio),
-          profileImgFilePath: req.file ? req.file.path : 'public/profile-images/anonymous.png',
+          profileImgFilePath: req.file ? he.decode(req.file.path) : 'public/profile-images/anonymous.png',
           userId: createdUser.id,
           friendCode: shortenedHash,
         }
