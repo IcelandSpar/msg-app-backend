@@ -229,6 +229,64 @@ const leaveGroup = async (req, res) => {
   }
 };
 
+const deleteGroup = async (req, res) => {
+  try {
+    const groupAndProfileMatch = await prisma.profile.findFirst({
+      where: {
+        id: req.params.profileId,
+      },
+      include: {
+        Group: {
+          where: {
+            id: req.params.groupId,
+          },
+          select: {
+            creatorId: true,
+          }
+        },
+      }
+    });
+  
+    // Check if user requesting is the creator
+    if(groupAndProfileMatch.Group[0].creatorId == req.params.profileId) {
+
+      const groupDeleted = await prisma.group.delete({
+        where: {
+          id: req.params.groupId,
+          creatorId: groupAndProfileMatch.Group[0].creatorId,
+        }
+      });
+
+      const memberGroups = await prisma.member.findMany({
+        where: {
+          profileId: req.params.profileId,
+        },
+        include: {
+          group: true,
+        },
+      });
+
+      return res.json({
+        success: true,
+        memberGroups,
+        groupDeleted,
+        groupAndProfileMatch,
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: "You must be the creator of the group to delete!",
+      })
+    }
+
+  } catch (err) {
+    console.error(err);
+    return res.json({
+      message: "Something went wrong...",
+    })
+  }
+}
+
 const getGroupChatMessages = async (req, res) => {
   try {
     const groupChatMsgs = await prisma.message.findMany({
@@ -395,6 +453,7 @@ module.exports = {
   createGroup,
   joinGroup,
   leaveGroup,
+  deleteGroup,
   getGroupChatMessages,
   getGroupMembers,
   checkIfAdminInGroup,
