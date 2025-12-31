@@ -246,10 +246,8 @@ const deleteGroup = async (req, res) => {
         },
       }
     });
-  
     // Check if user requesting is the creator
     if(groupAndProfileMatch.Group[0].creatorId == req.params.profileId) {
-
       const groupDeleted = await prisma.group.delete({
         where: {
           id: req.params.groupId,
