@@ -6,25 +6,23 @@ const { validateCreateGroup } = require("../validators/groupValidators.js");
 const he = require("he");
 
 const checkIfMember = async (req, res) => {
-
   try {
     const memberObj = await prisma.member.findFirst({
       where: {
         profileId: req.params.profileId,
         groupId: req.params.groupId,
-      }
+      },
     });
 
-      return res.status(200).json({
-        isMember: memberObj ? true : false,
-      });
+    return res.status(200).json({
+      isMember: memberObj ? true : false,
+    });
   } catch (err) {
     console.error(err);
     return res.status(400).json({
       message: "Something went wrong...",
     });
   }
-
 };
 
 const getMemberGroups = async (req, res) => {
@@ -139,15 +137,14 @@ const createGroup = [
           },
         });
 
-    const memberGroups = await prisma.member.findMany({
-      where: {
-        profileId: userProfile.id,
-      },
-      include: {
-        group: true,
-      },
-    });
-
+        const memberGroups = await prisma.member.findMany({
+          where: {
+            profileId: userProfile.id,
+          },
+          include: {
+            group: true,
+          },
+        });
 
         res.status(200).json({
           createdGroup: createdGroup,
@@ -156,10 +153,8 @@ const createGroup = [
         });
       }
     } catch (err) {
-
-        console.error(err);
-        return res.status(400);
-      
+      console.error(err);
+      return res.status(400);
     }
   },
 ];
@@ -242,17 +237,17 @@ const deleteGroup = async (req, res) => {
           },
           select: {
             creatorId: true,
-          }
+          },
         },
-      }
+      },
     });
     // Check if user requesting is the creator
-    if(groupAndProfileMatch.Group[0].creatorId == req.params.profileId) {
+    if (groupAndProfileMatch.Group[0].creatorId == req.params.profileId) {
       const groupDeleted = await prisma.group.delete({
         where: {
           id: req.params.groupId,
           creatorId: groupAndProfileMatch.Group[0].creatorId,
-        }
+        },
       });
 
       const memberGroups = await prisma.member.findMany({
@@ -274,16 +269,15 @@ const deleteGroup = async (req, res) => {
       return res.json({
         success: false,
         message: "You must be the creator of the group to delete!",
-      })
+      });
     }
-
   } catch (err) {
     console.error(err);
     return res.json({
       message: "Something went wrong...",
-    })
+    });
   }
-}
+};
 
 const getGroupChatMessages = async (req, res) => {
   try {
@@ -357,6 +351,49 @@ const checkIfAdminInGroup = async (req, res) => {
   }
 };
 
+const checkIfAdmin = async (profileId, groupId) => {
+  const memberObj = await prisma.member.findFirst({
+    where: {
+      profileId: profileId,
+      groupId: groupId,
+    },
+  });
+
+  return memberObj && memberObj.role == "ADMIN" ? true : false;
+};
+
+const updateGroupName = async (req, res) => {
+  try {
+    const isUserAdmin = await checkIfAdmin(
+      req.params.profileId,
+      req.params.groupId
+    );
+
+    if (isUserAdmin) {
+      const updatedGroup = await prisma.group.update({
+        where: {
+          id: req.params.groupId,
+        },
+        data: {
+          groupName: req.body.groupName,
+        },
+      });
+
+      return res.status(200).json({
+        success: true,
+        updatedGroup,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "You must be an Admin to update Group Info",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const removeMember = async (req, res) => {
   try {
     const checkIfAdmin = await prisma.member.findFirst({
@@ -406,7 +443,7 @@ const promoteToAdmin = async (req, res) => {
           profileId: req.params.profileId,
           groupId: req.params.groupId,
         },
-      })
+      });
       const promotedMember = await prisma.member.update({
         where: {
           id: memberToPromote.id,
@@ -416,15 +453,15 @@ const promoteToAdmin = async (req, res) => {
         },
       });
 
-    const adminRoleMembers = await prisma.member.findMany({
-      where: {
-        groupId: req.params.groupId,
-        role: "ADMIN",
-      },
-      include: {
-        member: true,
-      },
-    });
+      const adminRoleMembers = await prisma.member.findMany({
+        where: {
+          groupId: req.params.groupId,
+          role: "ADMIN",
+        },
+        include: {
+          member: true,
+        },
+      });
 
       return res.status(200).json({
         promotedMember,
@@ -432,11 +469,11 @@ const promoteToAdmin = async (req, res) => {
       });
     } else {
       return res.status(401).json({
-        message: "Missing credentials..."
-      })
+        message: "Missing credentials...",
+      });
     }
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(400).json({
       message: "Something went wrong...",
     });
@@ -454,6 +491,7 @@ module.exports = {
   deleteGroup,
   getGroupChatMessages,
   getGroupMembers,
+  updateGroupName,
   checkIfAdminInGroup,
   removeMember,
   promoteToAdmin,

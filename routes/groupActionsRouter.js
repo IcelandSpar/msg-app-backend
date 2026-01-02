@@ -13,6 +13,7 @@ const {
   removeMember,
   promoteToAdmin,
   deleteGroup,
+  updateGroupName,
 } = require("../controllers/groupActionsController");
 const groupActionsRouter = Router();
 
@@ -119,6 +120,12 @@ groupActionsRouter.post(
   passport.authenticate("jwt", { session: false }),
   upload.single("groupImg"),
   createGroup
+);
+
+groupActionsRouter.put(
+  "/update-group-name/:groupId/:profileId",
+  passport.authenticate("jwt", { session: false }),
+  updateGroupName
 );
 
 groupActionsRouter.delete(
