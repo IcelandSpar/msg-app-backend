@@ -2,7 +2,7 @@ const prisma = require("../db/prismaClient.js");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const { returnUserObjFromToken } = require("../utils/userQuery.js");
-const { validateCreateGroup } = require("../validators/groupValidators.js");
+const { validateCreateGroup, validateGroupNameChange } = require("../validators/groupValidators.js");
 const he = require("he");
 
 const checkIfMember = async (req, res) => {
@@ -362,8 +362,16 @@ const checkIfAdmin = async (profileId, groupId) => {
   return memberObj && memberObj.role == "ADMIN" ? true : false;
 };
 
-const updateGroupName = async (req, res) => {
+const updateGroupName = [ validateGroupNameChange, async (req, res) => {
   try {
+    const errors = validationResult(req);
+
+    if(!errors.isEmpty()){
+      return res.status(400).json({
+        errors: errors.array(),
+      })
+    }
+
     const isUserAdmin = await checkIfAdmin(
       req.params.profileId,
       req.params.groupId
@@ -392,7 +400,7 @@ const updateGroupName = async (req, res) => {
   } catch (err) {
     console.error(err);
   }
-};
+}];
 
 const removeMember = async (req, res) => {
   try {
