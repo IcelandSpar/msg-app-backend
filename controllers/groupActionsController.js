@@ -383,7 +383,7 @@ const updateGroupName = [ validateGroupNameChange, async (req, res) => {
           id: req.params.groupId,
         },
         data: {
-          groupName: req.body.groupName,
+          groupName: he.decode(req.body.groupName),
         },
       });
 
