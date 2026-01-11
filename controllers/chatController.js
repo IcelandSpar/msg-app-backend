@@ -8,6 +8,7 @@ const postChatMsg = [
   async (req, res) => {
     try {
       const errors = validationResult(req);
+        console.log(req.file);
 
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -19,6 +20,7 @@ const postChatMsg = [
             messageContent: he.decode(req.body.messageContent),
             groupId: req.body.groupId,
             authorId: req.body.authorId,
+            attatchedImagePath: req.file.path ? req.file.path : null, 
           },
         });
         return res.status(200).json(postedMsg);
