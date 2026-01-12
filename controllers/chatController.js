@@ -8,8 +8,6 @@ const postChatMsg = [
   async (req, res) => {
     try {
       const errors = validationResult(req);
-        console.log(req.file);
-
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array(),
@@ -23,7 +21,9 @@ const postChatMsg = [
             attatchedImagePath: req.file.path ? req.file.path : null, 
           },
         });
-        return res.status(200).json(postedMsg);
+        return res.status(200).json({
+          postedMsg,
+        });
       }
     } catch (err) {
       if (err) {

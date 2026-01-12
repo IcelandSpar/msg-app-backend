@@ -49,11 +49,12 @@ io.on("connection", (socket) => {
     socket.emit('joinRoomMsg', clientInfo.profileName + ' just joined the room!')
   });
 
-  socket.on('send message', ({ groupId, messageContent, profileName, imgPath }) => {
+  socket.on('send message', ({ groupId, messageContent, attatchedImagePath, profileName, imgPath }) => {
     socket.to(groupId).emit('received message', {
       date: new Date(),
       profileName: profileName,
       messageContent: messageContent,
+      attatchedImagePath: attatchedImagePath,
       groupId,
       imgPath: imgPath,
     });
