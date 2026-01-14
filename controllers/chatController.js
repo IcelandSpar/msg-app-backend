@@ -18,7 +18,7 @@ const postChatMsg = [
             messageContent: he.decode(req.body.messageContent),
             groupId: req.body.groupId,
             authorId: req.body.authorId,
-            attatchedImagePath: req.file.path ? req.file.path : null, 
+            attatchedImagePath: req.file ? req.file.path : null, 
           },
         });
         return res.status(200).json({
@@ -26,6 +26,7 @@ const postChatMsg = [
         });
       }
     } catch (err) {
+      console.error(err);
       if (err) {
         return res.status(401).json({ message: "Something went wrong..." });
       }

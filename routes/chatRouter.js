@@ -34,7 +34,6 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-
   // dest: './public/profile-images',
   fileFilter: fileFilter,
 });

@@ -36,6 +36,6 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-registerRouter.post("/" ,upload.single("profilePicture"), createAccount);
+registerRouter.post("/" , upload.single("profilePicture"), createAccount);
 
 module.exports = registerRouter;
