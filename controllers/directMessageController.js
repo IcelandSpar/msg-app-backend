@@ -72,6 +72,7 @@ const postMessage = [
             authorId: req.body.authorId,
             directMessageGroupId: req.body.directMessageGroupId,
             messageContent: he.decode(req.body.message),
+            attatchedImagePath: req.file ? req.file.path : null,
           },
         });
 
